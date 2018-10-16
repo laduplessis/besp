@@ -1,0 +1,6 @@
+<addon name="gbsp" version="0.0.1">
+            <depends on="BEAST" atleast="2.5.0"/>
+
+            <!-- Add other dependencies as necessary. -->
+            </addon>
+        
