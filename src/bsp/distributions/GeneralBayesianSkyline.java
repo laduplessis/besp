@@ -17,7 +17,7 @@ import java.util.Arrays;
 import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
 
 /**
- *  Base Bayesian Skyline implementation
+ * Base General Bayesian Skyline implementation
  *
  * @author Louis du Plessis
  * @date 2018/09/11
@@ -269,7 +269,7 @@ public class GeneralBayesianSkyline extends TreeDistribution {
     public double getChangeTime(int i) {
         prepareTimes();
 
-        int idx = Math.min(intervals.getIntervalCount()-1, cumulativeGroupSizes[i]);
+        int idx = cumulativeGroupSizes[i]-1;
         return coalescentTimes[idx];
     }
 
