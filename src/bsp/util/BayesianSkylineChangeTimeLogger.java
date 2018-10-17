@@ -4,13 +4,13 @@ import beast.core.CalculationNode;
 import beast.core.Function;
 import beast.core.Input;
 import beast.core.Loggable;
-import bsp.distributions.PreferentialBayesianSkyline;
+import bsp.distributions.GeneralBayesianSkyline;
 
 import java.io.PrintStream;
 
 public class BayesianSkylineChangeTimeLogger extends CalculationNode implements Loggable, Function {
 
-    final public Input<PreferentialBayesianSkyline> skylineInput =
+    final public Input<GeneralBayesianSkyline> skylineInput =
             new Input<>("skyline", "Skyline to log change times for", Input.Validate.REQUIRED);
 
     @Override
@@ -20,7 +20,7 @@ public class BayesianSkylineChangeTimeLogger extends CalculationNode implements 
 
     @Override
     public void init(PrintStream out) {
-        final PreferentialBayesianSkyline skyline = skylineInput.get();
+        final GeneralBayesianSkyline skyline = skylineInput.get();
         final int valueCount = skyline.getDimension();
 
         if (valueCount == 1) {
@@ -34,7 +34,7 @@ public class BayesianSkylineChangeTimeLogger extends CalculationNode implements 
 
     @Override
     public void log(long sample, PrintStream out) {
-        final PreferentialBayesianSkyline skyline = skylineInput.get();
+        final GeneralBayesianSkyline skyline = skylineInput.get();
 
         final int values = skyline.getDimension();
         for (int value = 0; value < values; value++) {
@@ -49,19 +49,19 @@ public class BayesianSkylineChangeTimeLogger extends CalculationNode implements 
 
     @Override
     public int getDimension() {
-        final PreferentialBayesianSkyline skyline = skylineInput.get();
+        final GeneralBayesianSkyline skyline = skylineInput.get();
         return skyline.getDimension();
     }
 
     @Override
     public double getArrayValue() {
-        final PreferentialBayesianSkyline skyline = skylineInput.get();
+        final GeneralBayesianSkyline skyline = skylineInput.get();
         return skyline.getChangeTime(0);
     }
 
     @Override
     public double getArrayValue(int dim) {
-        final PreferentialBayesianSkyline skyline = skylineInput.get();
+        final GeneralBayesianSkyline skyline = skylineInput.get();
         return skyline.getChangeTime(dim);
     }
 

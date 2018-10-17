@@ -39,14 +39,15 @@ public class GeneralBayesianSkyline extends TreeDistribution {
             new Input<>("groupSizes", "The number of events in each group in the skyline (use robust design if not provided)");
 
 
-    protected boolean useLog;         // Calculate logNe instead of Ne
+    protected TreeIntervals intervals;
     protected RealParameter popSizes, logPopSizes;
     protected IntegerParameter groupSizes;
-    protected int [] cumulativeGroupSizes;
-    protected double [] coalescentTimes;
 
-    protected TreeIntervals intervals;
+    protected int []    cumulativeGroupSizes;
+    protected double [] coalescentTimes, groupTimes;
 
+    protected boolean useLog;         // Calculate logNe instead of Ne
+    protected boolean arraysUpdated = false;
 
 
     @Override
@@ -68,12 +69,13 @@ public class GeneralBayesianSkyline extends TreeDistribution {
 
         ///////////////////////
         // Get tree intervals
-        // Allow input tree or tree intervals to be specified. If the input TreeInterface is not a Tree it will crash.
         if (treeInput.get() != null) {
-            intervals = new TreeIntervals((Tree) treeInput.get());
+            // Doesn't work... tree intervals are not updated with tree
+            // intervals.initByName("tree", treeInput.get());
+            throw new IllegalArgumentException("Only tree intervals (not tree) should be specified!");
         } else {
             intervals = treeIntervalsInput.get();
-            }
+        }
         nrCoal = intervals.getSampleCount();
 
 
@@ -97,7 +99,8 @@ public class GeneralBayesianSkyline extends TreeDistribution {
         }
 
         cumulativeGroupSizes = new int[nrGroups];
-        prepareTimes();
+        groupTimes = new double[nrGroups];
+        updateArrays();
 
         // GroupSizes needs to add up to coalescent events
         if (cumulativeGroupSizes[nrGroups - 1] != nrCoal) {
@@ -107,7 +110,7 @@ public class GeneralBayesianSkyline extends TreeDistribution {
             groupSizes.assignFromWithoutID(getRobustGroupSizes(nrCoal, nrGroups));
 
             // Recalculate cumulative group sizes, because group sizes have been changed
-            prepareTimes();
+            updateArrays();
         }
 
 
@@ -139,18 +142,25 @@ public class GeneralBayesianSkyline extends TreeDistribution {
         return(parameter);
     }
 
+    /**
+     * Updates the arrays used in likelihood calculation and other methods
+     * 
+     * TODO: Should only be called if the tree is dirty
+     */
+    protected void updateArrays() {
 
-    protected void prepareTimes() {
-
-        // Get cumulative group sizes
-        cumulativeGroupSizes[0] = groupSizes.getValue(0);
-        for (int i = 1; i < cumulativeGroupSizes.length; i++) {
-            cumulativeGroupSizes[i] = cumulativeGroupSizes[i-1] + groupSizes.getValue(i);
-        }
-
-        // Get coalescent times (unnecessary)
+        // Get coalescent times (not necessary for likelihood computation)
         coalescentTimes = intervals.getCoalescentTimes(coalescentTimes);
 
+        // Get cumulative group sizes and times
+        cumulativeGroupSizes[0] = groupSizes.getValue(0);
+        groupTimes[0]           = coalescentTimes[cumulativeGroupSizes[0]-1];
+        for (int i = 1; i < cumulativeGroupSizes.length; i++) {
+            cumulativeGroupSizes[i] = cumulativeGroupSizes[i-1] + groupSizes.getValue(i);
+            groupTimes[i]           = coalescentTimes[cumulativeGroupSizes[i]-1];
+        }
+
+        arraysUpdated = true;
     }
 
     @Override
@@ -161,8 +171,10 @@ public class GeneralBayesianSkyline extends TreeDistribution {
         double currentPopSize,
                currentLogPopSize;
 
-        // Get interval times
-        prepareTimes();
+        // Update arrays
+        if (!arraysUpdated) {
+            updateArrays();
+        }
 
         // Get likelihood for each segment
         logP = 0.0;
@@ -196,7 +208,8 @@ public class GeneralBayesianSkyline extends TreeDistribution {
 
 
     /**
-     * Copied and simplified from BayesianSkyline.java
+     * Calculates the log-likelihood of an interval under the coalescent with constant population size
+     * (Copied and simplified from BayesianSkyline.java)
      *
      * @param popSize
      * @param width
@@ -259,18 +272,37 @@ public class GeneralBayesianSkyline extends TreeDistribution {
         return popSizes.getDimension();
     }
 
-
     /**
-     * TODO: Fix it so it maps to the right coalescent intervals
+     * Return the i'th change time of the skyline parameter (for logging and skyline reconstruction)
      *
      * @param i
      * @return
      */
     public double getChangeTime(int i) {
-        prepareTimes();
+        if (!arraysUpdated) {
+            updateArrays();
+        }
 
-        int idx = cumulativeGroupSizes[i]-1;
-        return coalescentTimes[idx];
+        return groupTimes[i];
+    }
+
+
+    /**
+     * TODO: Check boundary conditions
+     *
+     * @param t
+     * @return
+     */
+    public double getPopSize(double t) {
+
+        int groupIndex = Arrays.binarySearch(groupTimes, t);
+        if (groupIndex < 0) {
+            groupIndex = -groupIndex - 1;
+        } else {
+            groupIndex++;
+        }
+
+        return popSizes.getValue(Math.min(groupIndex, popSizes.getDimension()-1));
     }
 
 
@@ -280,7 +312,20 @@ public class GeneralBayesianSkyline extends TreeDistribution {
 
     @Override
     protected boolean requiresRecalculation() {
+        arraysUpdated = false;
         return true;
+    }
+
+    @Override
+    public void store() {
+        arraysUpdated = false;
+        super.store();
+    }
+
+    @Override
+    public void restore() {
+        arraysUpdated = false;
+        super.restore();
     }
 
 
