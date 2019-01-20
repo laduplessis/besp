@@ -61,6 +61,7 @@ public class GeneralBayesianSkyline extends TreeDistribution {
             useLog = true;
             logPopSizes = logPopSizeInput.get();
             nrGroups    = logPopSizes.getDimension();
+            throw new IllegalArgumentException("Log population size parameterization not tested yet!");
         } else {
             useLog = false;
             popSizes = popSizeInput.get();
@@ -144,8 +145,6 @@ public class GeneralBayesianSkyline extends TreeDistribution {
 
     /**
      * Updates the arrays used in likelihood calculation and other methods
-     * 
-     * TODO: Should only be called if the tree is dirty
      */
     protected void updateArrays() {
 

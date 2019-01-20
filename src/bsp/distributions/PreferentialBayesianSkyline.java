@@ -162,14 +162,18 @@ public class PreferentialBayesianSkyline extends TreeDistribution {
                 groupIndex++;
 
             currentPopSize = popSizes.getArrayValue(groupIndex);
-            currentsamplingIntensity = currentTime < oldestSample ? samplingIntensity.getValue() : 0.0;
+            currentsamplingIntensity = currentTime <= oldestSample ? samplingIntensity.getValue() : 0.0;
 
             width = intervals.getInterval(i);
-
-            //System.out.println(i+"\t"+groupIndex+"\t"+currentTime+"\t"+intervals.getInterval(i)+"\t"+currentPopSize+"\t"+currentsamplingIntensity);
+            /*
+            double testval = calculateIntervalLikelihood(currentPopSize, currentsamplingIntensity, width, intervals.getLineageCount(i), intervals.getIntervalType(i));
+            if (intervals.getInterval(i) == 0) {
+                System.out.println(i + "\t" + groupIndex + "\t" + currentTime + "\t" + intervals.getInterval(i) + "\t" + currentPopSize + "\t" + currentsamplingIntensity+"\t"+intervals.getIntervalType(i)+"\t"+testval);
+            }*/
             //System.out.println(i+"\t"+coalIndex+"\t"+groupIndex+"\t"+currentTime+"\t"+intervals.getInterval(i)+"\t"+intervals.getCoalescentEvents(i));
 
             // Calculate likelihood for interval
+
             logP += calculateIntervalLikelihood(currentPopSize, currentsamplingIntensity, width, intervals.getLineageCount(i), intervals.getIntervalType(i));
 
             currentTime += width;
