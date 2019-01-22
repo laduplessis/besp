@@ -1,4 +1,4 @@
-package bsp.distributions;
+package bsp.deprecated;
 
 import beast.core.Input;
 import beast.core.parameter.IntegerParameter;
@@ -7,7 +7,7 @@ import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeDistribution;
 import beast.evolution.tree.TreeInterface;
-import beast.math.Binomial;
+import bsp.distributions.SegmentType;
 
 import java.util.*;
 

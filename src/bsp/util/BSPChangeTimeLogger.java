@@ -4,13 +4,13 @@ import beast.core.CalculationNode;
 import beast.core.Function;
 import beast.core.Input;
 import beast.core.Loggable;
-import bsp.distributions.EpochSamplingBayesianSkyline;
+import bsp.distributions.BSP;
 
 import java.io.PrintStream;
 
-public class EpochSamplingBSPChangeTimeLogger extends CalculationNode implements Loggable, Function {
+public class BSPChangeTimeLogger extends CalculationNode implements Loggable, Function {
 
-    final public Input<EpochSamplingBayesianSkyline> skylineInput =
+    final public Input<BSP> skylineInput =
             new Input<>("skyline", "Skyline to log change times for", Input.Validate.REQUIRED);
 
     @Override
@@ -20,8 +20,8 @@ public class EpochSamplingBSPChangeTimeLogger extends CalculationNode implements
 
     @Override
     public void init(PrintStream out) {
-        final EpochSamplingBayesianSkyline skyline = skylineInput.get();
-        final int valueCount = skyline.getDimension();
+        final BSP skyline = skylineInput.get();
+        final int valueCount = skyline.getPopSizeDimension();
 
         if (valueCount == 1) {
             out.print(this.getID()+"\t");
@@ -34,11 +34,11 @@ public class EpochSamplingBSPChangeTimeLogger extends CalculationNode implements
 
     @Override
     public void log(long sample, PrintStream out) {
-        final EpochSamplingBayesianSkyline skyline = skylineInput.get();
+        final BSP skyline = skylineInput.get();
 
-        final int values = skyline.getDimension();
+        final int values = skyline.getPopSizeDimension();
         for (int value = 0; value < values; value++) {
-            out.print(skyline.getChangeTime(value) + "\t");
+            out.print(skyline.getPopSizeChangeTime(value) + "\t");
         }
     }
 
@@ -49,20 +49,20 @@ public class EpochSamplingBSPChangeTimeLogger extends CalculationNode implements
 
     @Override
     public int getDimension() {
-        final EpochSamplingBayesianSkyline skyline = skylineInput.get();
+        final BSP skyline = skylineInput.get();
         return skyline.getDimension();
     }
 
     @Override
     public double getArrayValue() {
-        final EpochSamplingBayesianSkyline skyline = skylineInput.get();
-        return skyline.getChangeTime(0);
+        final BSP skyline = skylineInput.get();
+        return skyline.getPopSizeChangeTime(0);
     }
 
     @Override
     public double getArrayValue(int dim) {
-        final EpochSamplingBayesianSkyline skyline = skylineInput.get();
-        return skyline.getChangeTime(dim);
+        final BSP skyline = skylineInput.get();
+        return skyline.getPopSizeChangeTime(dim);
     }
 
 

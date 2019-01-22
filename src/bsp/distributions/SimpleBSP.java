@@ -19,9 +19,6 @@ import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
  * No bells or whistles to facilitate anything. This implementation will return the same likelihood as
  * beast.evolution.tree.coalescent.BayesianSkyline, but will hopefully also be faster
  *
- * TODO: Write a version that doesn' use beast.evolution.tree.coalescent.TreeIntervals as this class is probably more
- * expensive than it needs to be.
- *
  * @author Louis du Plessis
  * @date 2019/01/16
  */

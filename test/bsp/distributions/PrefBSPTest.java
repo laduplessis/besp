@@ -7,9 +7,7 @@ import bsp.deprecated.EpochSamplingBayesianSkyline;
 import junit.framework.TestCase;
 import org.junit.Test;
 
-
-
-public class EpochSamplingBayesianSkylineTest extends TestCase {
+public class PrefBSPTest extends TestCase {
 
     @Test
     public void test1 () {
@@ -27,9 +25,9 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
 
 
 
-        EpochSamplingBayesianSkyline skyline = new EpochSamplingBayesianSkyline();
-        skyline.initByName("tree", tree, "popSizes", "1.0 2.0 3.0", "groupSizes", "2 4 5",
-                "samplingIntensity", "2 3", "samplingEpochTimes", "10");
+        BSP skyline = new PrefBSP();
+        skyline.initByName("treeIntervals", intervals, "popSizes", "1.0 2.0 3.0", "popSizeGroupSizes", "2 4 5",
+                           "samplingIntensity", "2 3", "samplingIntensityGroupSizes", "2 4");
 
         System.out.println("Intervals: "+intervals.getIntervalCount());
         System.out.println("Coalescences: "+intervals.getSampleCount());
@@ -40,6 +38,7 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
         System.out.println(skyline.calculateLogP());
 
     }
+
 
 
     @Test
@@ -54,9 +53,8 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
         GeneralBayesianSkyline skyline1 = new PreferentialSamplingBayesianSkyline();
         skyline1.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "8 3", "treeIntervals", intervals);
 
-        EpochSamplingBayesianSkyline skyline2 = new EpochSamplingBayesianSkyline();
-        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "8 3",
-                "tree", tree);
+        BSP skyline2 = new PrefBSP();
+        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "popSizeGroupSizes", "8 3", "treeIntervals", intervals);
 
         double logP1 = skyline1.calculateLogP();
         double logP2 = skyline2.calculateLogP();
@@ -65,6 +63,8 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
 
         //System.out.println(logP1+"\t"+logP2);
     }
+
+
 
 
     @Test
@@ -79,9 +79,9 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
         GeneralBayesianSkyline skyline1 = new PreferentialSamplingBayesianSkyline();
         skyline1.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "4 5", "treeIntervals", intervals);
 
-        EpochSamplingBayesianSkyline skyline2 = new EpochSamplingBayesianSkyline();
-        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "4 5",
-                "tree", tree);
+        BSP skyline2 = new PrefBSP();
+        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "popSizeGroupSizes", "4 5", "treeIntervals", intervals);
+
 
         //PreferentialBayesianSkyline skyline2 = new PreferentialBayesianSkyline();
         //skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "4 5", "treeIntervals", intervals);
@@ -109,9 +109,9 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
         GeneralBayesianSkyline skyline1 = new PreferentialSamplingBayesianSkyline();
         skyline1.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "8 3", "treeIntervals", intervals);
 
-        EpochSamplingBayesianSkyline skyline2 = new EpochSamplingBayesianSkyline();
-        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "8 3",
-                "tree", tree);
+        BSP skyline2 = new PrefBSP();
+        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "popSizeGroupSizes", "8 3", "treeIntervals", intervals);
+
         double logP1 = skyline1.calculateLogP();
         double logP2 = skyline2.calculateLogP();
 
@@ -133,9 +133,9 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
         GeneralBayesianSkyline skyline1 = new PreferentialSamplingBayesianSkyline();
         skyline1.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "8 3", "treeIntervals", intervals);
 
-        EpochSamplingBayesianSkyline skyline2 = new EpochSamplingBayesianSkyline();
-        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "8 3",
-                "tree", tree);
+        BSP skyline2 = new PrefBSP();
+        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "popSizeGroupSizes", "8 3", "treeIntervals", intervals);
+
         double logP1 = skyline1.calculateLogP();
         double logP2 = skyline2.calculateLogP();
 
@@ -144,5 +144,30 @@ public class EpochSamplingBayesianSkylineTest extends TestCase {
 
     }
 
+
+    @Test
+    public void testPSBSPTreeEpochTest () {
+
+        System.out.println("Preferential sampling Bayesian Skyline compared to old Preferential Bayesian Skyline implementation: " +
+                "Tree with all sampling and coalescent times at unique times");
+
+        Tree tree = new TreeParser("((((D4Mexico84:5.0,D4ElSal94:15.0):1.0,D4PRico86:8.0):1.0,D4Tahiti79:2.0):5.0,D4Indon77:5.0);",false);
+        TreeIntervals intervals = new TreeIntervals(tree);
+
+        BSP skyline2 = new PrefBSP();
+        skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "1.0 2.0 3.0", "popSizeGroupSizes", "4 5",
+                            "samplingIntensityGroupSizes", "1 1 1", "treeIntervals", intervals);
+
+
+        //PreferentialBayesianSkyline skyline2 = new PreferentialBayesianSkyline();
+        //skyline2.initByName("popSizes", "1.0 2.0", "samplingIntensity", "2.0", "groupSizes", "4 5", "treeIntervals", intervals);
+
+        System.out.println(skyline2);
+
+        double logP2 = skyline2.calculateLogP();
+
+        System.out.println(logP2);
+
+    }
 
 }

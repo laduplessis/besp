@@ -1,7 +1,8 @@
-package bsp.distributions;
+package bsp.deprecated;
 
 
 import beast.math.Binomial;
+import bsp.distributions.SegmentType;
 
 import javax.swing.text.Segment;
 

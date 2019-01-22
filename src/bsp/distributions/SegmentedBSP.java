@@ -39,11 +39,15 @@ public class SegmentedBSP extends TreeDistribution {
     protected int [] cumulativeGroupSizes,
                      groupLastSegments;
 
+    protected int [] storedCumulativeGroupSizes,
+                     storedGroupLastSegments;
+
     boolean segmentsUpdated = false,
-            treeChanged = true;
+            treeChanged     = true;
 
     // Segments of the skyline model
-    List<BSPSegment> segments;
+    List<BSPSegment>  segments,
+                storedSegments;
 
 
     @Override
@@ -87,6 +91,9 @@ public class SegmentedBSP extends TreeDistribution {
         // Initalise arrays
         cumulativeGroupSizes = new int[nrGroups];
         groupLastSegments = new int [nrGroups];
+
+        storedCumulativeGroupSizes = new int[nrGroups];
+        storedGroupLastSegments = new int [nrGroups];
 
         // GroupSizes needs to add up to coalescent events
         cumulativeGroupSizes[0] = groupSizes.getValue(0);
@@ -335,18 +342,36 @@ public class SegmentedBSP extends TreeDistribution {
 
     @Override
     public void store() {
-        segmentsUpdated = false;
-        treeChanged = true;
+        //segmentsUpdated = false;
+        //treeChanged = true;
+
+        System.arraycopy(cumulativeGroupSizes, 0, storedCumulativeGroupSizes, 0, cumulativeGroupSizes.length);
+        System.arraycopy(groupLastSegments,    0, storedGroupLastSegments,    0, groupLastSegments.length);
+
+        storedSegments = new ArrayList();
+        for (BSPSegment segment : segments) {
+            storedSegments.add(new BSPSegment(segment));
+        }
 
         super.store();
     }
 
     @Override
     public void restore() {
-        segmentsUpdated = false;
-        treeChanged = true;
+        //segmentsUpdated = false;
+        //treeChanged = true;
 
-        getSegments();
+        int [] tmp = storedCumulativeGroupSizes;
+        storedCumulativeGroupSizes = cumulativeGroupSizes;
+        cumulativeGroupSizes = tmp;
+
+        tmp = storedGroupLastSegments;
+        storedGroupLastSegments = groupLastSegments;
+        groupLastSegments = tmp;
+
+        List<BSPSegment> tmp2 = storedSegments;
+        storedSegments = segments;
+        segments = tmp2;
 
         super.restore();
     }
