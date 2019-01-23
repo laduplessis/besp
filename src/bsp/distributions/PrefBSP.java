@@ -7,9 +7,6 @@ import beast.core.util.Log;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.math.Binomial;
 
-import java.util.Arrays;
-
-import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
 import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
 
 
@@ -60,7 +57,7 @@ public class PrefBSP extends BSP {
 
         ////////////////////////////
         // Get minimum group time
-        minGroupTime = minGroupTimeInput.get();
+        minWidth = minWidthInput.get();
 
 
         ////////////////////
@@ -123,6 +120,39 @@ public class PrefBSP extends BSP {
             updateArrays();
         }
 
+        // popSize group widths need to be longer than minWidth
+        int i = 0;
+        int numInitializationAttemps = numInitializationAttempsInput.get();
+        while (!checkGroupWidths(popSizeGroupTimes, minWidth)) {
+            if (i > numInitializationAttemps) {
+                throw new IllegalArgumentException("Minimum effective population group width is still shorter than minWidth (" + minWidth + ") "
+                                                 + "after "+numInitializationAttemps+" attempts at redistributing group sizes.\n"
+                                                 + "Try decreasing the number of groups or the minimum group width.");
+                                               //+ "Current group times: " + Arrays.toString(popSizeGroupTimes));
+            }
+            System.out.println("Redistributing pop");
+            redistributeGroups(popSizeGroupSizes, popSizeGroupTimes);
+            updateArrays();
+            i++;
+        }
+
+        // samplingIntensity group widths need to be longer than minWidth
+        i = 0;
+        while (!checkGroupWidths(samplingIntensityGroupTimes, minWidth)) {
+            if (i > numInitializationAttemps) {
+                throw new IllegalArgumentException("Minimum sampling intensity group width is still shorter than minWidth (" + minWidth + ") "
+                                                 + "after "+numInitializationAttemps+" attempts at redistributing group sizes.\n"
+                                                 + "Try decreasing the number of groups or the minimum group width.");
+                                               //+ "Current group times: " + Arrays.toString(popSizeGroupTimes));
+            }
+            System.out.println("Redistributing sampling");
+            redistributeGroups(samplingIntensityGroupSizes, samplingIntensityGroupTimes);
+            updateArrays();
+            i++;
+        }
+
+
+
     }
 
 
@@ -178,9 +208,9 @@ public class PrefBSP extends BSP {
         if (!arraysUpdated) {
             updateArrays();
 
-            //if (!(checkPopSizeGroupTimes() && checkPopSizeGroupSizes())) {
-            //    return Double.NEGATIVE_INFINITY;
-            //}
+            if (!(checkGroupWidths(popSizeGroupTimes, minWidth) && checkGroupWidths(samplingIntensityGroupTimes, minWidth))) {
+                return Double.NEGATIVE_INFINITY;
+            }
         }
 
         //System.out.println(Arrays.toString(samplingTimes));
