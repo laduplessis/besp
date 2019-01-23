@@ -40,6 +40,8 @@ public class BSPTest extends TestCase {
         double expected = -14.487972108574;
         assertEquals(expected, logP+C, BEASTTestCase.PRECISION);
         //System.out.println(logP + "\t" + C +"\t" + (logP+C));
+
+        System.out.println(skyline1);
     }
 
 

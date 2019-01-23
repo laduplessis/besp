@@ -285,4 +285,25 @@ public class PrefBSP extends BSP {
         return lk;
     }
 
+    @Override
+    public String toString() {
+
+        double start  = 0.0;
+        String outstr = super.toString();
+
+        outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n"+
+                        "------------------------------------------------------------------------------\n",
+                "group", "size", "start", "end", "width", "samplingIntensity");
+
+        for (int i = 0; i < samplingIntensityGroupSizes.getDimension(); i++) {
+            outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n",
+                    i, samplingIntensityGroupSizes.getValue(i), start, samplingIntensityGroupTimes[i],
+                    samplingIntensityGroupTimes[i]-start, samplingIntensity.getValue(i));
+            start = samplingIntensityGroupTimes[i];
+        }
+
+        return outstr+"\n";
+
+    }
+
 }

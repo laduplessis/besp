@@ -226,11 +226,21 @@ public class BSP extends TreeDistribution {
     @Override
     public String toString() {
 
-        String outstr = this.getID();
+        double start  = 0.0;
+        String outstr = this.getID() + "\npopSize groups\n";
 
+        outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n"+
+                        "------------------------------------------------------------------------------\n",
+                        "group", "size", "start", "end", "width", "popSize");
 
+        for (int i = 0; i < popSizeGroupSizes.getDimension(); i++) {
+            outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n",
+                                    i, popSizeGroupSizes.getValue(i), start, popSizeGroupTimes[i],
+                                    popSizeGroupTimes[i]-start, popSizes.getValue(i));
+            start = popSizeGroupTimes[i];
+        }
 
-        return outstr;
+        return outstr+"\n";
     }
 
 
