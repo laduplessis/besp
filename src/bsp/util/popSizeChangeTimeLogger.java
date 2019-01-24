@@ -8,7 +8,7 @@ import bsp.distributions.BSP;
 
 import java.io.PrintStream;
 
-public class BSPChangeTimeLogger extends CalculationNode implements Loggable, Function {
+public class popSizeChangeTimeLogger extends CalculationNode implements Loggable, Function {
 
     final public Input<BSP> skylineInput =
             new Input<>("skyline", "Skyline to log change times for", Input.Validate.REQUIRED);

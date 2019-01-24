@@ -39,6 +39,9 @@ public class BSP extends TreeDistribution {
     final public Input<IntegerParameter> popSizeGroupSizeInput =
             new Input<>("popSizeGroupSizes", "The number of events in each population size group in the skyline (use robust design if not provided)");
 
+    final public Input<RealParameter> popSizeEpochTimesInput =
+            new Input<>("popSizeEpochTimes", "Times when the population size change (distance from most recent tip)");
+
     final public Input<Double> minWidthInput =
             new Input<>("minWidth","Minimum width of a group (end-start)",0.0);
 
@@ -86,11 +89,25 @@ public class BSP extends TreeDistribution {
 
         ////////////////////
         // Get group sizes
+        // If epoch times are specified use those to get the groups
         // If popSizeGroupSizes are not specified use robust design (equal group sizes)
-        if (popSizeGroupSizeInput.get() != null) {
-            popSizeGroupSizes = popSizeGroupSizeInput.get();
+        if (popSizeEpochTimesInput.get() != null) {
+
+            if (popSizeGroupSizeInput.get() != null) {
+                throw new IllegalArgumentException("Only one of popSizeEpochTimes and popSizeGroupSizes should be specified.");
+            }
+
+            RealParameter EpochTimes = popSizeEpochTimesInput.get();
+            popSizeGroupSizes = epochsToGroups(intervals.getCoalescentTimes(null), EpochTimes.getValues(), 1, Integer.MAX_VALUE);
+
         } else {
-            popSizeGroupSizes = getRobustpopSizeGroupSizes(nrCoal, nrGroups, 1, Integer.MAX_VALUE);
+
+            if (popSizeGroupSizeInput.get() != null) {
+                popSizeGroupSizes = popSizeGroupSizeInput.get();
+            } else {
+                popSizeGroupSizes = getRobustpopSizeGroupSizes(nrCoal, nrGroups, 1, Integer.MAX_VALUE);
+            }
+
         }
 
         // Group sizes does not equal the dimension of the skyline parameter
@@ -113,7 +130,7 @@ public class BSP extends TreeDistribution {
         // popSizeGroupSizes needs to add up to coalescent events
         if (cumulativePopSizeGroupSizes[nrGroups - 1] != nrCoal) {
             Log.warning.println("WARNING: The sum of the initial group sizes does not match the number of coalescent " +
-                    "events in the tree. Initializing to equal group sizes (robust design)");
+                                "events in the tree. Initializing to equal group sizes (robust design)");
 
             popSizeGroupSizes.assignFromWithoutID(getRobustpopSizeGroupSizes(nrCoal, nrGroups,
                                                                              popSizeGroupSizes.getLower(), popSizeGroupSizes.getUpper()));
@@ -591,6 +608,76 @@ public class BSP extends TreeDistribution {
 
     }
     */
+
+
+
+    /**
+     * Start at 0, group 0
+     * For each tip in the tree
+     *     If tip age > epoch time, increase group
+     *     Increase current group size
+     *
+     * Make it verbose, since it's only called once
+     *
+     * When assigning by epoch the bounds can be changed, if initial assignment doesn't respect bounds
+     */
+    protected IntegerParameter epochsToGroups(double [] eventtimes, Double [] epochtimes, int lower, int upper) {
+
+        final boolean print = true;
+
+        int    group = 0,
+               maxSize = 0,
+               minSize = Integer.MAX_VALUE;
+        double start,
+               end = 0.0;
+
+        Integer[] values = new Integer[epochtimes.length+1];
+        Arrays.fill(values, 0);
+
+        if (print) {
+            System.out.println("Assigning group sizes from epoch times:\n");
+            System.out.println(String.format("%10s%10s\t|%12s%12s%12s\t|%12s",
+                    "Group","Size","Start","End","Width","Input epoch"));
+        }
+
+        for (int i = 0; i < eventtimes.length; i++) {
+            if (group < epochtimes.length && eventtimes[i] > epochtimes[group]) {
+                if (epochtimes[group] < eventtimes[i-1]) {
+                    //Log.warning.println("WARNING: Group " + group+1 + " spans 0 events. The model will be unidentifiable");
+                    throw new IllegalArgumentException("Group " + (group+1) + " spans 0 events. The model will be unidentifiable.");
+                }
+
+                start = end;
+                end   = eventtimes[i-1];
+                if (print) System.out.println(String.format("%10s%10s\t|%12.5f%12.5f%12.5f\t|%12.5f",
+                                              group+1, values[group], start, end, end-start, epochtimes[group]));
+
+                if (values[group] < minSize) minSize = values[group];
+                if (values[group] > maxSize) maxSize = values[group];
+                group++;
+            }
+
+            values[group]++;
+        }
+        if (print) System.out.println(String.format("%10s%10s\t|%12.5f%12.5f%12.5f\t|%12.5f",
+                                      group+1, values[group], end, eventtimes[eventtimes.length-1], eventtimes[eventtimes.length-1]-end,
+                                      eventtimes[eventtimes.length-1]));
+
+        if (maxSize > upper) {
+            if (print) System.out.println("Adjusting upper bound from "+upper+" to "+maxSize);
+            upper = maxSize;
+        }
+
+        if (minSize < lower) {
+            if (print) System.out.println("Adjusting lower bound from "+lower+" to "+minSize);
+            lower = minSize;
+        }
+
+        IntegerParameter parameter = new IntegerParameter(values);
+        parameter.setBounds(Math.max(1,lower), Math.min(Integer.MAX_VALUE,upper));
+
+        return(parameter);
+    }
 
 
 

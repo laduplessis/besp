@@ -7,6 +7,8 @@ import beast.core.util.Log;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.math.Binomial;
 
+import java.util.Arrays;
+
 import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
 
 
@@ -24,6 +26,8 @@ public class PrefBSP extends BSP {
     final public Input<IntegerParameter> samplingIntensityGroupSizeInput =
             new Input<>("samplingIntensityGroupSizes", "The number of events in each sampling intensity group in the skyline (use robust design if not provided)");
 
+    final public Input<RealParameter> samplingEpochTimesInput =
+            new Input<>("samplingEpochTimes","Times when the sampling epochs change (distance from most recent tip)");
 
     protected RealParameter samplingIntensity;
     protected IntegerParameter samplingIntensityGroupSizes;
@@ -62,20 +66,54 @@ public class PrefBSP extends BSP {
 
         ////////////////////
         // Get group sizes
+        // If epoch times are specified use those to get the groups
         // If group sizes are not specified use robust design (equal group sizes)
-        if (popSizeGroupSizeInput.get() != null) {
-            popSizeGroupSizes = popSizeGroupSizeInput.get();
+
+        // popSize
+        if (popSizeEpochTimesInput.get() != null) {
+
+            if (popSizeGroupSizeInput.get() != null) {
+                throw new IllegalArgumentException("Only one of popSizeEpochTimes and popSizeGroupSizes should be specified.");
+            }
+
+            RealParameter popSizeEpochTimes = popSizeEpochTimesInput.get();
+            double [] eventTimes = new double [intervals.getIntervalCount()];
+            for (int i = 0; i < eventTimes.length; i++) {
+                eventTimes[i] = intervals.getIntervalTime(i);
+            }
+            popSizeGroupSizes = epochsToGroups(eventTimes, popSizeEpochTimes.getValues(), 1, Integer.MAX_VALUE);
+
         } else {
-            popSizeGroupSizes = getRobustpopSizeGroupSizes(nrEvents, popGroups, 1, Integer.MAX_VALUE);
+
+            if (popSizeGroupSizeInput.get() != null) {
+                popSizeGroupSizes = popSizeGroupSizeInput.get();
+            } else {
+                popSizeGroupSizes = getRobustpopSizeGroupSizes(nrEvents, popGroups, 1, Integer.MAX_VALUE);
+            }
+
         }
 
-        if (samplingIntensityGroupSizeInput.get() != null) {
-            samplingIntensityGroupSizes = samplingIntensityGroupSizeInput.get();
+        // samplingIntensity
+        if (samplingEpochTimesInput.get() != null) {
+
+            if (samplingIntensityGroupSizeInput.get() != null) {
+                throw new IllegalArgumentException("Only one of samplingEpochTimes and samplingIntensityGroupSizes should be specified.");
+            }
+
+            RealParameter samplingEpochTimes = samplingEpochTimesInput.get();
+            samplingIntensityGroupSizes = epochsToGroups(getSamplingTimes(), samplingEpochTimes.getValues(), 1, Integer.MAX_VALUE);
+
         } else {
-            samplingIntensityGroupSizes = getRobustpopSizeGroupSizes(nrSamples, samplingGroups, 1, Integer.MAX_VALUE);
+
+            if (samplingIntensityGroupSizeInput.get() != null) {
+                samplingIntensityGroupSizes = samplingIntensityGroupSizeInput.get();
+            } else {
+                samplingIntensityGroupSizes = getRobustpopSizeGroupSizes(nrSamples, samplingGroups, 1, Integer.MAX_VALUE);
+            }
+
         }
 
-        // Group sizes does not equal the dimension of the skyline parameter
+        // Group sizes do not equal the dimension of the skyline parameter
         if (popSizeGroupSizes.getDimension() != popGroups || samplingIntensityGroupSizes.getDimension() != samplingGroups) {
             throw new IllegalArgumentException("Number of groups should match the dimension of the skyline parameter "
                                              + "(effective population size or sampling intensity).");
@@ -130,7 +168,6 @@ public class PrefBSP extends BSP {
                                                  + "Try decreasing the number of groups or the minimum group width.");
                                                //+ "Current group times: " + Arrays.toString(popSizeGroupTimes));
             }
-            System.out.println("Redistributing pop");
             redistributeGroups(popSizeGroupSizes, popSizeGroupTimes);
             updateArrays();
             i++;
@@ -145,16 +182,29 @@ public class PrefBSP extends BSP {
                                                  + "Try decreasing the number of groups or the minimum group width.");
                                                //+ "Current group times: " + Arrays.toString(popSizeGroupTimes));
             }
-            System.out.println("Redistributing sampling");
             redistributeGroups(samplingIntensityGroupSizes, samplingIntensityGroupTimes);
             updateArrays();
             i++;
         }
 
-
-
     }
 
+
+
+    protected double [] getSamplingTimes() {
+
+        // Get sampling times
+        samplingTimes = new double [intervals.getSampleCount()+1];
+        int j = 0;
+        for (int i = 0; i < intervals.getIntervalCount(); i++) {
+            if (intervals.getIntervalType(i) == SAMPLE) {
+                samplingTimes[j] = intervals.getIntervalTime(i);
+                j++;
+            }
+        }
+
+        return(samplingTimes);
+    }
 
 
     /**
@@ -171,14 +221,7 @@ public class PrefBSP extends BSP {
         }
 
         // Get sampling times
-        samplingTimes = new double [intervals.getSampleCount()+1];
-        int j = 0;
-        for (int i = 0; i < intervals.getIntervalCount(); i++) {
-            if (intervals.getIntervalType(i) == SAMPLE) {
-                samplingTimes[j] = intervals.getIntervalTime(i);
-                j++;
-            }
-        }
+        samplingTimes = getSamplingTimes();
 
         // Get sampling intensity cumulative group sizes and times
         cumulativeSamplingIntensityGroupSizes[0] = samplingIntensityGroupSizes.getValue(0);
@@ -305,5 +348,47 @@ public class PrefBSP extends BSP {
         return outstr+"\n";
 
     }
+
+
+    /**********************************/
+    /* Methods for sampling intensity */
+    /**********************************/
+
+    public int getSamplingIntensityDimension() { return samplingIntensity.getDimension(); }
+
+    /**
+     * Return the i'th change time of the skyline parameter (for logging and skyline reconstruction)
+     *
+     * @param i
+     * @return
+     */
+    public double getSamplingIntensityChangeTime(int i) {
+        if (!arraysUpdated) {
+            updateArrays();
+        }
+
+        return samplingIntensityGroupTimes[i];
+    }
+
+
+    /**
+     * TODO: Check boundary conditions
+     *
+     * @param t
+     * @return
+     */
+    public double getSamplingIntensity(double t) {
+
+        int groupIndex = Arrays.binarySearch(samplingIntensityGroupTimes, t);
+        if (groupIndex < 0) {
+            groupIndex = -groupIndex - 1;
+        } else {
+            groupIndex++;
+        }
+
+        return popSizes.getValue(Math.min(groupIndex, samplingIntensity.getDimension()-1));
+    }
+
+
 
 }
