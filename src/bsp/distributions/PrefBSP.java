@@ -6,6 +6,7 @@ import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.math.Binomial;
+import org.omg.SendingContext.RunTime;
 
 import java.util.Arrays;
 
@@ -33,7 +34,8 @@ public class PrefBSP extends BSP {
     protected IntegerParameter samplingIntensityGroupSizes;
 
     protected int []    cumulativeSamplingIntensityGroupSizes;
-    protected double [] samplingTimes, samplingIntensityGroupTimes;
+    protected double [] samplingTimes, intervalTimes,
+                        samplingIntensityGroupTimes;
 
     @Override
     public void initAndValidate() {
@@ -101,7 +103,11 @@ public class PrefBSP extends BSP {
             }
 
             RealParameter samplingEpochTimes = samplingEpochTimesInput.get();
-            samplingIntensityGroupSizes = epochsToGroups(getSamplingTimes(), samplingEpochTimes.getValues(), 1, Integer.MAX_VALUE);
+
+            intervalTimes = new double [intervals.getIntervalCount()];
+            samplingTimes = new double [intervals.getSampleCount()+1];
+            updateIntervalTimes(intervalTimes, samplingTimes);
+            samplingIntensityGroupSizes = epochsToGroups(samplingTimes, samplingEpochTimes.getValues(), 1, Integer.MAX_VALUE);
 
         } else {
 
@@ -132,6 +138,9 @@ public class PrefBSP extends BSP {
         //storedCumulativepopSizeGroupSizes = new int[nrGroups];
         popSizeGroupTimes           = new double[popGroups];
         samplingIntensityGroupTimes = new double[samplingGroups];
+        intervalTimes = new double [intervals.getIntervalCount()];
+        samplingTimes = new double [intervals.getSampleCount()+1];
+        //samplingTimes = getSamplingTimes(getIntervalTimes(null));
         updateArrays();
 
         // popSizeGroupSizes needs to add up to coalescent + sampling events
@@ -162,6 +171,10 @@ public class PrefBSP extends BSP {
         int i = 0;
         int numInitializationAttemps = numInitializationAttempsInput.get();
         while (!checkGroupWidths(popSizeGroupTimes, minWidth)) {
+            if (i == 0) {
+                Log.warning.println("WARNING: Minimum effective population group width is shorter than minWidth ("+ minWidth + ")\n"
+                                  + "Attempting to adjust...");
+            } else
             if (i > numInitializationAttemps) {
                 throw new IllegalArgumentException("Minimum effective population group width is still shorter than minWidth (" + minWidth + ") "
                                                  + "after "+numInitializationAttemps+" attempts at redistributing group sizes.\n"
@@ -176,6 +189,10 @@ public class PrefBSP extends BSP {
         // samplingIntensity group widths need to be longer than minWidth
         i = 0;
         while (!checkGroupWidths(samplingIntensityGroupTimes, minWidth)) {
+            if (i == 0) {
+                Log.warning.println("WARNING: Minimum  sampling intensity group width is shorter than minWidth ("+ minWidth + ")\n"
+                                  + "Attempting to adjust...");
+            } else
             if (i > numInitializationAttemps) {
                 throw new IllegalArgumentException("Minimum sampling intensity group width is still shorter than minWidth (" + minWidth + ") "
                                                  + "after "+numInitializationAttemps+" attempts at redistributing group sizes.\n"
@@ -187,24 +204,58 @@ public class PrefBSP extends BSP {
             i++;
         }
 
+        System.out.println(this.toString());
+
     }
 
 
 
-    protected double [] getSamplingTimes() {
+    protected void updateIntervalTimes(double [] intervalTimes, double [] samplingTimes) {
+
+        double time = 0.0;
+        int j = 0;
+        for (int i = 0; i < intervals.getIntervalCount(); i++) {
+            time += intervals.getInterval(i);
+            intervalTimes[i] = time;
+            if (intervals.getIntervalType(i) == SAMPLE) {
+                samplingTimes[j] = time;
+                j++;
+            }
+        }
+    }
+
+    /*
+    protected double [] getSamplingTimes(double [] intervalTimes) {
+
 
         // Get sampling times
-        samplingTimes = new double [intervals.getSampleCount()+1];
+        double [] values = new double [intervals.getSampleCount()+1];
         int j = 0;
         for (int i = 0; i < intervals.getIntervalCount(); i++) {
             if (intervals.getIntervalType(i) == SAMPLE) {
-                samplingTimes[j] = intervals.getIntervalTime(i);
+                values[j] = intervals.getIntervalTime(i);
                 j++;
             }
         }
 
-        return(samplingTimes);
+
+
+
+        for (int i = 0; i < values.length; i++) {
+            if (samplingTimes != null && values[i] != samplingTimes[i]) {
+                for (j = 0; j < values.length; j++) {
+                    System.out.println(j + "\t" + values[j] + "\t"+(values[j] == samplingTimes[j] ? "==" : "!=") + samplingTimes[j]);
+                    //System.out.println(Arrays.toString(samplingTimes));
+                    //System.out.println(Arrays.toString(values));
+                }
+                throw new RuntimeException("crash");
+            }
+        }
+
+
+        return(values);
     }
+    */
 
 
     /**
@@ -212,6 +263,38 @@ public class PrefBSP extends BSP {
      */
     protected void updateArrays() {
 
+        //System.out.println("Updating arrays...");
+        updateIntervalTimes(intervalTimes, samplingTimes);
+
+        // Get popsize cumulative group sizes and times (and extract sampling times)
+        cumulativePopSizeGroupSizes[0] = popSizeGroupSizes.getValue(0);
+        popSizeGroupTimes[0]           = intervalTimes[cumulativePopSizeGroupSizes[0]-1];
+        for (int i = 1; i < cumulativePopSizeGroupSizes.length; i++) {
+            cumulativePopSizeGroupSizes[i] = cumulativePopSizeGroupSizes[i-1] + popSizeGroupSizes.getValue(i);
+            popSizeGroupTimes[i]           = intervalTimes[cumulativePopSizeGroupSizes[i]-1];
+        }
+
+        //System.out.println((cumulativePopSizeGroupSizes[cumulativePopSizeGroupSizes.length-1]-1)+"\t"+(intervals.getIntervalCount()-1));
+
+        //System.out.println("grouptime: "+popSizeGroupTimes[popSizeGroupTimes.length-1]+"\ttree intervals: "+
+        //        intervals.getIntervalTime(intervals.getIntervalCount()-1) +"\t"+
+        //        (popSizeGroupTimes[popSizeGroupTimes.length-1] == intervals.getIntervalTime(intervals.getIntervalCount()-1)));
+
+        // Get sampling times
+        //samplingTimes = getSamplingTimes(intervalTimes);
+
+        // Get sampling intensity cumulative group sizes and times
+        cumulativeSamplingIntensityGroupSizes[0] = samplingIntensityGroupSizes.getValue(0);
+        samplingIntensityGroupTimes[0]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[0]-1];
+        for (int i = 1; i < cumulativeSamplingIntensityGroupSizes.length; i++) {
+            cumulativeSamplingIntensityGroupSizes[i] = cumulativeSamplingIntensityGroupSizes[i-1] + samplingIntensityGroupSizes.getValue(i);
+            samplingIntensityGroupTimes[i]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[i]-1];
+        }
+
+
+
+
+        /*
         // Get popsize cumulative group sizes and times (and extract sampling times)
         cumulativePopSizeGroupSizes[0] = popSizeGroupSizes.getValue(0);
         popSizeGroupTimes[0]           = intervals.getIntervalTime(cumulativePopSizeGroupSizes[0]-1);
@@ -219,6 +302,12 @@ public class PrefBSP extends BSP {
             cumulativePopSizeGroupSizes[i] = cumulativePopSizeGroupSizes[i-1] + popSizeGroupSizes.getValue(i);
             popSizeGroupTimes[i]           = intervals.getIntervalTime(cumulativePopSizeGroupSizes[i]-1);
         }
+
+        //System.out.println((cumulativePopSizeGroupSizes[cumulativePopSizeGroupSizes.length-1]-1)+"\t"+(intervals.getIntervalCount()-1));
+
+        //System.out.println("grouptime: "+popSizeGroupTimes[popSizeGroupTimes.length-1]+"\ttree intervals: "+
+        //        intervals.getIntervalTime(intervals.getIntervalCount()-1) +"\t"+
+        //        (popSizeGroupTimes[popSizeGroupTimes.length-1] == intervals.getIntervalTime(intervals.getIntervalCount()-1)));
 
         // Get sampling times
         samplingTimes = getSamplingTimes();
@@ -230,6 +319,7 @@ public class PrefBSP extends BSP {
             cumulativeSamplingIntensityGroupSizes[i] = cumulativeSamplingIntensityGroupSizes[i-1] + samplingIntensityGroupSizes.getValue(i);
             samplingIntensityGroupTimes[i]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[i]-1];
         }
+         */
 
         arraysUpdated = true;
     }
@@ -246,6 +336,8 @@ public class PrefBSP extends BSP {
                currentTime = 0.0,
                currentPopSize,
                currentSamplingIntensity;
+
+        //System.out.println("Calculating likelihood...");
 
         // Update arrays
         if (!arraysUpdated) {
@@ -334,13 +426,13 @@ public class PrefBSP extends BSP {
         double start  = 0.0;
         String outstr = super.toString();
 
-        outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n"+
+        outstr += String.format("%10s  %10s | %7s  %7s  %7s | %10s\n"+
                         "------------------------------------------------------------------------------\n",
                 "group", "size", "start", "end", "width", "samplingIntensity");
 
         for (int i = 0; i < samplingIntensityGroupSizes.getDimension(); i++) {
-            outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n",
-                    i, samplingIntensityGroupSizes.getValue(i), start, samplingIntensityGroupTimes[i],
+            outstr += String.format("%10s  %10s | %4.5f  %4.5f  %4.5f | %10s\n",
+                    i+1, samplingIntensityGroupSizes.getValue(i), start, samplingIntensityGroupTimes[i],
                     samplingIntensityGroupTimes[i]-start, samplingIntensity.getValue(i));
             start = samplingIntensityGroupTimes[i];
         }
@@ -388,6 +480,7 @@ public class PrefBSP extends BSP {
 
         return popSizes.getValue(Math.min(groupIndex, samplingIntensity.getDimension()-1));
     }
+
 
 
 

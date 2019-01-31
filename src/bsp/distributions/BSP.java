@@ -142,6 +142,10 @@ public class BSP extends TreeDistribution {
         int i = 0;
         int numInitializationAttemps = numInitializationAttempsInput.get();
         while (!checkGroupWidths(popSizeGroupTimes, minWidth)) {
+            if (i == 0) {
+                Log.warning.println("WARNING: Minimum effective population group width is shorter than minWidth ("+ minWidth + ")\n"
+                        + "Attempting to adjust...");
+            } else
             if (i > numInitializationAttemps) {
                 throw new IllegalArgumentException("Minimum group width is still shorter than minWidth (" + minWidth + ") "
                         + "after "+numInitializationAttemps+" attempts at redistributing group sizes.\n"
@@ -246,13 +250,13 @@ public class BSP extends TreeDistribution {
         double start  = 0.0;
         String outstr = this.getID() + "\npopSize groups\n";
 
-        outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n"+
+        outstr += String.format("%10s  %10s | %7s  %7s  %7s | %10s\n"+
                         "------------------------------------------------------------------------------\n",
                         "group", "size", "start", "end", "width", "popSize");
 
         for (int i = 0; i < popSizeGroupSizes.getDimension(); i++) {
-            outstr += String.format("%10s%10s |%10s%10s%10s |%10s\n",
-                                    i, popSizeGroupSizes.getValue(i), start, popSizeGroupTimes[i],
+            outstr += String.format("%10s  %10s | %4.5f  %4.5f  %4.5f | %10s\n",
+                                    i+1, popSizeGroupSizes.getValue(i), start, popSizeGroupTimes[i],
                                     popSizeGroupTimes[i]-start, popSizes.getValue(i));
             start = popSizeGroupTimes[i];
         }
@@ -309,12 +313,16 @@ public class BSP extends TreeDistribution {
 
     @Override
     protected boolean requiresRecalculation() {
+        //System.out.println("Dirty skyline");
+
         arraysUpdated = false;
         return true;
     }
 
     @Override
     public void store() {
+        //System.out.println("Store skyline");
+
         arraysUpdated = false;
         //System.arraycopy(cumulativePopSizeGroupSizes, 0, storedCumulativepopSizeGroupSizes, 0, cumulativePopSizeGroupSizes.length);
         super.store();
@@ -325,6 +333,8 @@ public class BSP extends TreeDistribution {
      * No real speed advantage to storing and restoring arrays instead of just always updating
      */
     public void restore() {
+        //System.out.println("Restore skyline");
+
         arraysUpdated = false;
         //int [] tmp = storedCumulativepopSizeGroupSizes;
         //storedCumulativepopSizeGroupSizes = cumulativePopSizeGroupSizes;
