@@ -24,8 +24,9 @@ import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
  *
  * This implementation makes use of the TreeIntervals class, like the original BayesianSkyline
  *
- * Only one parameter (popSizes size) which can only change at coalescent times, which are grouped with
+ * Only one parameter (popSizes) which can only change at coalescent times, which are grouped with
  * popSizeGroupSizes.
+ *
  * Times for groups are logged as well and there is a minimum width for each group.
  *
  * @author Louis du Plessis
@@ -45,7 +46,7 @@ public class BSP extends TreeDistribution {
     final public Input<Double> minWidthInput =
             new Input<>("minWidth","Minimum width of a group (end-start)",0.0);
 
-    final public Input<Integer> numInitializationAttempsInput =
+    final public Input<Integer> numInitializationAttemptsInput =
             new Input<>("numInitializationAttempts","Number of times to try to initialize the group sizes"+
                               "if the minimum group width constraint is not satisfied",10000);
 
@@ -105,7 +106,7 @@ public class BSP extends TreeDistribution {
             if (popSizeGroupSizeInput.get() != null) {
                 popSizeGroupSizes = popSizeGroupSizeInput.get();
             } else {
-                popSizeGroupSizes = getRobustpopSizeGroupSizes(nrCoal, nrGroups, 1, Integer.MAX_VALUE);
+                popSizeGroupSizes = getRobustPopSizeGroupSizes(nrCoal, nrGroups, 1, Integer.MAX_VALUE);
             }
 
         }
@@ -132,7 +133,7 @@ public class BSP extends TreeDistribution {
             Log.warning.println("WARNING: The sum of the initial group sizes does not match the number of coalescent " +
                                 "events in the tree. Initializing to equal group sizes (robust design)");
 
-            popSizeGroupSizes.assignFromWithoutID(getRobustpopSizeGroupSizes(nrCoal, nrGroups,
+            popSizeGroupSizes.assignFromWithoutID(getRobustPopSizeGroupSizes(nrCoal, nrGroups,
                                                                              popSizeGroupSizes.getLower(), popSizeGroupSizes.getUpper()));
 
             // Recalculate cumulative group sizes, because group sizes have been changed
@@ -140,7 +141,7 @@ public class BSP extends TreeDistribution {
         }
 
         int i = 0;
-        int numInitializationAttemps = numInitializationAttempsInput.get();
+        int numInitializationAttemps = numInitializationAttemptsInput.get();
         while (!checkGroupWidths(popSizeGroupTimes, minWidth)) {
             if (i == 0) {
                 Log.warning.println("WARNING: Minimum effective population group width is shorter than minWidth ("+ minWidth + ")\n"
@@ -250,12 +251,12 @@ public class BSP extends TreeDistribution {
         double start  = 0.0;
         String outstr = this.getID() + "\npopSize groups\n";
 
-        outstr += String.format("%10s  %10s | %7s  %7s  %7s | %10s\n"+
+        outstr += String.format("%10s  %10s | %10s  %10s  %10s | %10s\n"+
                         "------------------------------------------------------------------------------\n",
                         "group", "size", "start", "end", "width", "popSize");
 
         for (int i = 0; i < popSizeGroupSizes.getDimension(); i++) {
-            outstr += String.format("%10s  %10s | %4.5f  %4.5f  %4.5f | %10s\n",
+            outstr += String.format("%10s  %10s | %10.5f  %10.5f  %10.5f | %10.5f\n",
                                     i+1, popSizeGroupSizes.getValue(i), start, popSizeGroupTimes[i],
                                     popSizeGroupTimes[i]-start, popSizes.getValue(i));
             start = popSizeGroupTimes[i];
@@ -398,7 +399,7 @@ public class BSP extends TreeDistribution {
      * @param groups
      * @return
      */
-    protected IntegerParameter getRobustpopSizeGroupSizes(int events, int groups, int lower, int upper) {
+    protected IntegerParameter getRobustPopSizeGroupSizes(int events, int groups, int lower, int upper) {
 
         int eventsEach   = events / groups;
         int eventsExtras = events % groups;
@@ -420,15 +421,16 @@ public class BSP extends TreeDistribution {
 
 
     /**
-     * (works similar to a DeltaExchangeOperator
+     * Randomly redistribute group sizes
+     * (works similar to a DeltaExchangeOperator)
      *
      * Select two random indices of sizes (two randomly selected groups)
      * Then select random delta
      * Increase one group size by delta, decrease the other by delta
      *
      * Delta is adjusted so the parameter respects the limits
-     * All groups > 0
-     * No group >= sum(groups)
+     * - All groups > 0
+     * - No group >= sum(groups)
      *
      * @param sizes
      */
@@ -487,12 +489,13 @@ public class BSP extends TreeDistribution {
 
     /**
      * Heuristic random algorithm for redistributing groups to maximise the minimum group duration
+     * (not guaranteed to work)
      *
-     * 1) Sort groups by durations
-     * 2) To select dim1, always select the group with the shortest duration
-     * 3) To select dim2, draw weighted random sample, weights are duration where all groups of size 1 have weight 0
-     * 4) Always set delta to 1 (alternatively, select delta randomly between 1 and max possible delta)
-     * 5) sizes[dim1] += delta, sizes[dim2] -= delta
+     * 1. Sort groups by durations
+     * 2. To select dim1, always select the group with the shortest duration
+     * 3. To select dim2, draw weighted random sample, weights are duration where all groups of size 1 have weight 0
+     * 4. Always set delta to 1 (alternatively, select delta randomly between 1 and max possible delta)
+     * 5. sizes[dim1] += delta, sizes[dim2] -= delta
      *
      */
     protected void redistributeGroups(IntegerParameter groupSizes, double [] groupTimes) {
@@ -548,77 +551,6 @@ public class BSP extends TreeDistribution {
             }
         }
     }
-
-
-    /*
-    protected void redistributeGroups() {
-
-
-        double minTime = Double.POSITIVE_INFINITY,
-                maxTime = 0,
-                time;
-        int dim1 = 0, dim2;
-
-        Integer [] sizes = popSizeGroupSizes.getValues();
-
-
-
-        dim2 = Randomizer.nextInt(popSizeGroupTimes.length-1);
-        if (dim2 >= dim1) {
-            ++dim2;
-        }
-
-        for (int i = 1; i < popSizeGroupTimes.length; i++) {
-            time = popSizeGroupTimes[i] - popSizeGroupTimes[i-1];
-
-            if (time < minTime) {
-                minTime = time;
-                dim1 = i;
-            }
-
-            if (time > maxTime && sizes[i] > 1) {
-                maxTime = time;
-                dim2 = i;
-            }
-        }
-
-        System.out.println(dim1+"\t("+minTime+")\t\t"+dim2+"\t("+maxTime+")");
-
-        // Prevents adjusted sizes to be < minSize or > maxSize
-        int delta,
-                deltaMax,
-                minSize = 0,
-                maxSize = 0;
-        for (int i = 0; i < sizes.length; i++) {
-            maxSize += sizes[i];
-        }
-        deltaMax = Math.min(maxSize - sizes[dim1], sizes[dim2] - minSize) - 1;
-
-        //System.out.println(sizes[dim1] + "\t" + sizes[dim2] + "\t" + deltaMax);
-
-        if (deltaMax > 0) {
-            delta = Randomizer.nextInt((int) Math.round(deltaMax)) + 1;
-            //delta = 1;
-
-            sizes[dim1] += delta;
-            sizes[dim2] -= delta;
-            // System.out.println(Arrays.toString(sizes) + "\t" + delta + "\t" + deltaMax);
-
-            if (sizes[dim1] <= minSize || sizes[dim1] >= maxSize || sizes[dim2] <= minSize || sizes[dim2] >= maxSize) {
-                throw new RuntimeException("This should not happen!");
-            }
-
-            for (int j = 0; j < sizes.length; j++) {
-                popSizeGroupSizes.setValue(j, sizes[j]);
-            }
-
-        } else {
-            System.out.println("Cannot alter");
-        }
-
-    }
-    */
-
 
 
     /**

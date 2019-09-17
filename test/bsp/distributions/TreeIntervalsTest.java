@@ -9,6 +9,13 @@ import org.junit.Test;
 
 import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
 
+
+/**
+ * Unit tests for beast.evolution.tree.coalescent.TreeIntervals.java
+ *
+ * These are mostly just to check that TreeIntervals does what I think it does
+ *
+ */
 public class TreeIntervalsTest extends TestCase {
 
 

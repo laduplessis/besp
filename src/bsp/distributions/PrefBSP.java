@@ -90,7 +90,7 @@ public class PrefBSP extends BSP {
             if (popSizeGroupSizeInput.get() != null) {
                 popSizeGroupSizes = popSizeGroupSizeInput.get();
             } else {
-                popSizeGroupSizes = getRobustpopSizeGroupSizes(nrEvents, popGroups, 1, Integer.MAX_VALUE);
+                popSizeGroupSizes = getRobustPopSizeGroupSizes(nrEvents, popGroups, 1, Integer.MAX_VALUE);
             }
 
         }
@@ -114,7 +114,7 @@ public class PrefBSP extends BSP {
             if (samplingIntensityGroupSizeInput.get() != null) {
                 samplingIntensityGroupSizes = samplingIntensityGroupSizeInput.get();
             } else {
-                samplingIntensityGroupSizes = getRobustpopSizeGroupSizes(nrSamples, samplingGroups, 1, Integer.MAX_VALUE);
+                samplingIntensityGroupSizes = getRobustPopSizeGroupSizes(nrSamples, samplingGroups, 1, Integer.MAX_VALUE);
             }
 
         }
@@ -148,7 +148,7 @@ public class PrefBSP extends BSP {
             Log.warning.println("WARNING: The sum of the initial effective population group sizes does not match the number of coalescent "
                               + "and sampling events in the tree. Initializing to equal group sizes (robust design)");
 
-            popSizeGroupSizes.assignFromWithoutID(getRobustpopSizeGroupSizes(nrEvents, popGroups,
+            popSizeGroupSizes.assignFromWithoutID(getRobustPopSizeGroupSizes(nrEvents, popGroups,
                                                   popSizeGroupSizes.getLower(), popSizeGroupSizes.getUpper()));
 
             // Recalculate cumulative group sizes, because group sizes have been changed
@@ -160,7 +160,7 @@ public class PrefBSP extends BSP {
             Log.warning.println("WARNING: The sum of the initial sampling intensity group sizes does not match the number of "
                               + "sampling events in the tree. Initializing to equal group sizes (robust design)");
 
-            samplingIntensityGroupSizes.assignFromWithoutID(getRobustpopSizeGroupSizes(nrSamples, samplingGroups,
+            samplingIntensityGroupSizes.assignFromWithoutID(getRobustPopSizeGroupSizes(nrSamples, samplingGroups,
                     samplingIntensityGroupSizes.getLower(), samplingIntensityGroupSizes.getUpper()));
 
             // Recalculate cumulative group sizes, because group sizes have been changed
@@ -169,7 +169,7 @@ public class PrefBSP extends BSP {
 
         // popSize group widths need to be longer than minWidth
         int i = 0;
-        int numInitializationAttemps = numInitializationAttempsInput.get();
+        int numInitializationAttemps = numInitializationAttemptsInput.get();
         while (!checkGroupWidths(popSizeGroupTimes, minWidth)) {
             if (i == 0) {
                 Log.warning.println("WARNING: Minimum effective population group width is shorter than minWidth ("+ minWidth + ")\n"
@@ -223,39 +223,6 @@ public class PrefBSP extends BSP {
             }
         }
     }
-
-    /*
-    protected double [] getSamplingTimes(double [] intervalTimes) {
-
-
-        // Get sampling times
-        double [] values = new double [intervals.getSampleCount()+1];
-        int j = 0;
-        for (int i = 0; i < intervals.getIntervalCount(); i++) {
-            if (intervals.getIntervalType(i) == SAMPLE) {
-                values[j] = intervals.getIntervalTime(i);
-                j++;
-            }
-        }
-
-
-
-
-        for (int i = 0; i < values.length; i++) {
-            if (samplingTimes != null && values[i] != samplingTimes[i]) {
-                for (j = 0; j < values.length; j++) {
-                    System.out.println(j + "\t" + values[j] + "\t"+(values[j] == samplingTimes[j] ? "==" : "!=") + samplingTimes[j]);
-                    //System.out.println(Arrays.toString(samplingTimes));
-                    //System.out.println(Arrays.toString(values));
-                }
-                throw new RuntimeException("crash");
-            }
-        }
-
-
-        return(values);
-    }
-    */
 
 
     /**
