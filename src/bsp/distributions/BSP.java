@@ -185,7 +185,8 @@ public class BSP extends TreeDistribution {
 
         int    groupIndex = 0,
                coalIndex  = 0;
-        double currentPopSize;
+        double currentPopSize,
+               currentTime = 0;
 
         // Update arrays
         if (!arraysUpdated) {
@@ -207,6 +208,9 @@ public class BSP extends TreeDistribution {
             }
 
             currentPopSize = popSizes.getArrayValue(groupIndex);
+            System.out.println(currentPopSize +"\t"+ getPopSize(currentTime + (intervals.getInterval(i)/2)));
+            currentTime = intervals.getIntervalTime(i);
+
             logP += calculateIntervalLikelihood(currentPopSize, intervals.getInterval(i), intervals.getLineageCount(i), intervals.getIntervalType(i));
         }
 
@@ -239,8 +243,8 @@ public class BSP extends TreeDistribution {
                 break;
         }
 
-        //System.out.printf("%10.5f %10s |%10d%12s |%10s\n",
-        //        lk, width, lineageCount, type, popSize);
+        //System.out.printf("%10.5f %10.5f |%10d %12s |%10.5f\n",
+        //                    lk, width, lineageCount, type, popSize);
 
         return lk;
     }
