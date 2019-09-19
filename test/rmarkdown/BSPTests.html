@@ -290,17 +290,18 @@ div.tocify {
 
 <h1 class="title toc-ignore">Bayesian Skyline Plot tests</h1>
 <h4 class="author">Louis du Plessis</h4>
-<h4 class="date">Last modified: 18 Sep 2019</h4>
+<h4 class="date">Last modified: 19 Sep 2019</h4>
 
 </div>
 
 
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>Tests to check that the new general Bayesian skyline model returns the same results as the old Bayesian Skyline model implemented in the BEAST2 core.</p>
+<p>Tests to check that the new Bayesian Skyline Plot implementation (<code>bsp.distributions.BSP</code>) returns the same results as the old Bayesian Skyline Plot implementation in the BEAST2 core (<code>beast.evolution.tree.coalescent.BayesianSkyline</code>).</p>
+<hr />
 </div>
-<div id="tests" class="section level1">
-<h1>Tests</h1>
+<div id="homochronous-dataset-hcv" class="section level1">
+<h1>Homochronous dataset (HCV)</h1>
 <div id="likelihood-comparison" class="section level2">
 <h2>Likelihood comparison</h2>
 <p>Run two separate analyses with the same data, operators and seeds, using the old and new Bayesian skyline models. Check that the maximum absolute difference between the likelihoods of the old and new models are within the tolerance.</p>
@@ -333,6 +334,44 @@ div.tocify {
     maxdiff &lt;- max(abs(changeTimes - treeTimes))</code></pre>
 <p>Maximum change time difference: 2.700062e-13</p>
 <p>Pass test: <strong>TRUE</strong></p>
+<hr />
+</div>
+</div>
+<div id="heterochronous-dataset-bison" class="section level1">
+<h1>Heterochronous dataset (bison)</h1>
+<div id="likelihood-comparison-1" class="section level2">
+<h2>Likelihood comparison</h2>
+<p>Run two separate analyses with the same data, operators and seeds, using the old and new Bayesian skyline models. Check that the maximum absolute difference between the likelihoods of the old and new models are within the tolerance.</p>
+<pre class="r"><code>  lf1 &lt;- readLog(&quot;../../examples/BSP/output/bison_bspold_mcpgamma_127.log&quot;,  burnin=0)
+  lf2 &lt;- readLog(&quot;../../examples/BSP/output/bison_bsp_mcpgamma_127.log&quot;, burnin=0)
+  maxdiff &lt;- max(abs(lf1[, &quot;BayesianSkyline&quot;] - lf2[, &quot;BayesianSkyline&quot;]))</code></pre>
+<p>Maximum likelihood difference: 1.336753e-08</p>
+<p>Pass test: <strong>TRUE</strong></p>
+</div>
+<div id="direct-likelihood-comparison-1" class="section level2">
+<h2>Direct likelihood comparison</h2>
+<p>Run one analysis, with both the old and new models as treepriors, sharing the same parameters. Check that the maximum absolute difference between the likelihoods of the old and new models are within the tolerance.</p>
+<pre class="r"><code>  lf &lt;- readLog(&quot;../../examples/BSP/output/bison_bsp_mcpgamma_skylinecomparison_127.log&quot;, burnin=0)
+  maxdiff &lt;- max(abs(lf[ ,&quot;BayesianSkylineNew&quot;] - lf[, &quot;BayesianSkyline&quot;]))</code></pre>
+<p>Maximum likelihood difference: 4.547474e-13</p>
+<p>Pass test: <strong>TRUE</strong></p>
+</div>
+<div id="change-time-logger-comparison-1" class="section level2">
+<h2>Change time logger comparison</h2>
+<p>Check that the change times logged by <code>BayesianSkylineChangeTimesLogger</code> are identical to the change times calculated from the logged trees.</p>
+<pre class="r"><code>    # Change point times logged by change time logger
+    lf &lt;- readLog(&quot;../../examples/BSP/output/bison_bsp_mcpgamma_127.log&quot;, burnin=0)
+    changeTimes &lt;- getLogFileSubset(lf, &quot;bPopSizeChangeTimes&quot;)
+    
+    # Calculate change point times from the logged trees and logged group sizes
+    tree &lt;- readTreeLog(&quot;../../examples/BSP/output/bison_bsp_mcpgamma_127.trees&quot;, burnin=0)
+    groupSizes &lt;- getLogFileSubset(lf,&quot;bGroupSizes&quot;)
+    treeTimes  &lt;- getChangeTimes(tree, groupSizes)
+    
+    maxdiff &lt;- max(abs(changeTimes - treeTimes))</code></pre>
+<p>Maximum change time difference: 1.009539e-10</p>
+<p>Pass test: <strong>TRUE</strong></p>
+<hr />
 </div>
 </div>
 <div id="session-info" class="section level1">

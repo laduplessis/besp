@@ -201,17 +201,17 @@ public class BSP extends TreeDistribution {
         logP = 0.0;
         for (int i = 0; i < intervals.getIntervalCount(); i++) {
 
-            if (intervals.getIntervalType(i) == COALESCENT) {
-                coalIndex++;
-                if (coalIndex > cumulativePopSizeGroupSizes[groupIndex])
-                    groupIndex++;
-            }
-
             currentPopSize = popSizes.getArrayValue(groupIndex);
-            System.out.println(currentPopSize +"\t"+ getPopSize(currentTime + (intervals.getInterval(i)/2)));
-            currentTime = intervals.getIntervalTime(i);
+            //System.out.println(currentPopSize +"\t"+ getPopSize(currentTime + (intervals.getInterval(i)/2)));
+            //currentTime = intervals.getIntervalTime(i);
 
             logP += calculateIntervalLikelihood(currentPopSize, intervals.getInterval(i), intervals.getLineageCount(i), intervals.getIntervalType(i));
+
+            if (intervals.getIntervalType(i) == COALESCENT) {
+                coalIndex++;
+                if (coalIndex >= cumulativePopSizeGroupSizes[groupIndex])
+                    groupIndex++;
+            }
         }
 
         return logP;
@@ -253,7 +253,7 @@ public class BSP extends TreeDistribution {
     public String toString() {
 
         double start  = 0.0;
-        String outstr = this.getID() + "\npopSize groups\n";
+        String outstr = (this.getID() == null ? "Anonymous BSP" : this.getID() ) + "\npopSize groups\n";
 
         outstr += String.format("%10s  %10s | %10s  %10s  %10s | %10s\n"+
                         "------------------------------------------------------------------------------\n",

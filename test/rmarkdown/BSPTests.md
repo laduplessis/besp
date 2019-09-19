@@ -1,7 +1,7 @@
 ---
 title: "Bayesian Skyline Plot tests"
 author: "Louis du Plessis"
-date: 'Last modified: 18 Sep 2019'
+date: 'Last modified: 19 Sep 2019'
 output:
   html_document:
     toc: yes
@@ -20,11 +20,16 @@ editor_options:
 
 # Summary
 
-Tests to check that the new general Bayesian skyline model returns the same results as the old Bayesian Skyline model implemented in the BEAST2 core.
+Tests to check that the new Bayesian Skyline Plot implementation (`bsp.distributions.BSP`) returns the same results as the old Bayesian Skyline Plot implementation in the BEAST2 core (`beast.evolution.tree.coalescent.BayesianSkyline`).
     
 
+
+
+
+
+---
   
-# Tests
+# Homochronous dataset (HCV)
   
 ## Likelihood comparison
 
@@ -81,6 +86,71 @@ Maximum change time difference: 2.700062e-13
 
 Pass test: **TRUE**
 
+
+
+
+---
+
+# Heterochronous dataset (bison)
+  
+## Likelihood comparison
+
+Run two separate analyses with the same data, operators and seeds, using the old and new Bayesian skyline models. Check that the maximum absolute difference between the likelihoods of the old and new models are within the tolerance.
+
+
+```r
+  lf1 <- readLog("../../examples/BSP/output/bison_bspold_mcpgamma_127.log",  burnin=0)
+  lf2 <- readLog("../../examples/BSP/output/bison_bsp_mcpgamma_127.log", burnin=0)
+  maxdiff <- max(abs(lf1[, "BayesianSkyline"] - lf2[, "BayesianSkyline"]))
+```
+
+Maximum likelihood difference: 1.336753e-08
+
+Pass test: **TRUE**
+
+
+## Direct likelihood comparison
+
+Run one analysis, with both the old and new models as treepriors, sharing the same parameters. Check that the maximum absolute difference between the likelihoods of the old and new models are within the tolerance.
+
+
+```r
+  lf <- readLog("../../examples/BSP/output/bison_bsp_mcpgamma_skylinecomparison_127.log", burnin=0)
+  maxdiff <- max(abs(lf[ ,"BayesianSkylineNew"] - lf[, "BayesianSkyline"]))
+```
+
+Maximum likelihood difference: 4.547474e-13
+
+Pass test: **TRUE**
+
+
+
+## Change time logger comparison
+
+Check that the change times logged by `BayesianSkylineChangeTimesLogger` are identical to the change times calculated from the logged trees. 
+
+
+
+
+```r
+    # Change point times logged by change time logger
+    lf <- readLog("../../examples/BSP/output/bison_bsp_mcpgamma_127.log", burnin=0)
+    changeTimes <- getLogFileSubset(lf, "bPopSizeChangeTimes")
+    
+    # Calculate change point times from the logged trees and logged group sizes
+    tree <- readTreeLog("../../examples/BSP/output/bison_bsp_mcpgamma_127.trees", burnin=0)
+    groupSizes <- getLogFileSubset(lf,"bGroupSizes")
+    treeTimes  <- getChangeTimes(tree, groupSizes)
+    
+    maxdiff <- max(abs(changeTimes - treeTimes))
+```
+
+Maximum change time difference: 1.009539e-10
+
+Pass test: **TRUE**
+
+
+---
 
 # Session info
 
