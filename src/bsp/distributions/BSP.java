@@ -1,6 +1,8 @@
 package bsp.distributions;
 
 
+import beast.core.Citation;
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
@@ -32,6 +34,14 @@ import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
  * @author Louis du Plessis
  * @date 2019/01/20
  */
+@Description("Bayesian skyline: A likelihood function for the generalized skyline plot coalescent.")
+@Citation(value="Drummond, A. J., Rambaut, A., Shapiro, B., & Pybus, O. G. (2005).\n" +
+                "  Bayesian coalescent inference of past population dynamics from molecular sequences.\n" +
+                "  Molecular biology and evolution, 22(5), 1185-1192.",
+                year = 2005, firstAuthorSurname = "Drummond", DOI="10.1093/molbev/msi103")
+@Citation(value="Parag, K.V., du Plessis, L., Pybus, O.G. (2019).\n"+
+                "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.\n",
+                year = 2019, firstAuthorSurname = "Parag", DOI="10.1101/686378")
 public class BSP extends TreeDistribution {
 
     final public Input<RealParameter> popSizeInput =
