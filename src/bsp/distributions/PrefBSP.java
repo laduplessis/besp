@@ -1,5 +1,7 @@
 package bsp.distributions;
 
+import beast.core.Citation;
+import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
@@ -13,22 +15,28 @@ import java.util.Arrays;
 import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
 
 
-/**
- * Bayesian Skyline Plot implementation (with sampling intensity epochs/groups).
+/***************************************************************
+ * Bayesian Epoch Sampling Skyline Plot implementation (BESP). *
+ * *************************************************************
  *
  * @author Louis du Plessis
  * @date 2019/01/21
  */
+@Description("BESP: A likelihood function for epoch sampling skyline plot coalescent.")
+@Citation(value="Parag, K.V., du Plessis, L., Pybus, O.G. (2019).\n"+
+        "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.\n",
+        year = 2019, firstAuthorSurname = "Parag", DOI="10.1101/686378")
+
 public class PrefBSP extends BSP {
 
     final public Input<RealParameter> samplingIntensityInput =
-            new Input<>("samplingIntensity","Constant sampling intensity");
+            new Input<>("samplingIntensity","Sampling intensity (for each epoch)");
 
     final public Input<IntegerParameter> samplingIntensityGroupSizeInput =
-            new Input<>("samplingIntensityGroupSizes", "The number of events in each sampling intensity group in the skyline (use robust design if not provided)");
+            new Input<>("samplingIntensityGroupSizes", "The number of sampling events in each sampling intensity epoch (use robust design if not provided)");
 
     final public Input<RealParameter> samplingEpochTimesInput =
-            new Input<>("samplingEpochTimes","Times when the sampling epochs change (distance from most recent tip)");
+            new Input<>("samplingEpochTimes","Times when the sampling intensity change (distance from most recent tip)");
 
     protected RealParameter samplingIntensity;
     protected IntegerParameter samplingIntensityGroupSizes;

@@ -37,7 +37,7 @@ import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
  * @author Louis du Plessis
  * @date 2019/01/20
  */
-@Description("Bayesian skyline: A likelihood function for the generalized skyline plot coalescent.")
+@Description("BSP: A likelihood function for the generalized skyline plot coalescent.")
 @Citation(value="Drummond, A. J., Rambaut, A., Shapiro, B., & Pybus, O. G. (2005).\n" +
                 "  Bayesian coalescent inference of past population dynamics from molecular sequences.\n" +
                 "  Molecular biology and evolution, 22(5), 1185-1192.",
@@ -52,7 +52,7 @@ public class BSP extends TreeDistribution {
             new Input<>("popSizes","Effective population size (skyline parameter)");
 
     final public Input<IntegerParameter> popSizeGroupSizeInput =
-            new Input<>("popSizeGroupSizes", "The number of events in each population size group in the skyline (use robust design if not provided)");
+            new Input<>("popSizeGroupSizes", "The number of events in each population size segment in the skyline (use robust design if not provided)");
 
     final public Input<RealParameter> popSizeEpochTimesInput =
             new Input<>("popSizeEpochTimes", "Times when the population size change (distance from most recent tip)");
