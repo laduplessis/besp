@@ -19,6 +19,10 @@ import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
  * Bayesian Epoch Sampling Skyline Plot implementation (BESP). *
  * *************************************************************
  *
+ *
+ * - Tests showed no real speed advantage to storing and restoring arrays instead of just always updating at every
+ *   sample
+ *
  * @author Louis du Plessis
  * @date 2019/01/21
  */
@@ -27,7 +31,7 @@ import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
         "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.\n",
         year = 2019, firstAuthorSurname = "Parag", DOI="10.1101/686378")
 
-public class PrefBSP extends BSP {
+public class BESP extends BSP {
 
     final public Input<RealParameter> samplingIntensityInput =
             new Input<>("samplingIntensity","Sampling intensity (for each epoch)");
@@ -217,7 +221,6 @@ public class PrefBSP extends BSP {
     }
 
 
-
     protected void updateIntervalTimes(double [] intervalTimes, double [] samplingTimes) {
 
         double time = 0.0;
@@ -238,7 +241,6 @@ public class PrefBSP extends BSP {
      */
     protected void updateArrays() {
 
-        //System.out.println("Updating arrays...");
         updateIntervalTimes(intervalTimes, samplingTimes);
 
         // Get popsize cumulative group sizes and times (and extract sampling times)
@@ -249,15 +251,6 @@ public class PrefBSP extends BSP {
             popSizeGroupTimes[i]           = intervalTimes[cumulativePopSizeGroupSizes[i]-1];
         }
 
-        //System.out.println((cumulativePopSizeGroupSizes[cumulativePopSizeGroupSizes.length-1]-1)+"\t"+(intervals.getIntervalCount()-1));
-
-        //System.out.println("grouptime: "+popSizeGroupTimes[popSizeGroupTimes.length-1]+"\ttree intervals: "+
-        //        intervals.getIntervalTime(intervals.getIntervalCount()-1) +"\t"+
-        //        (popSizeGroupTimes[popSizeGroupTimes.length-1] == intervals.getIntervalTime(intervals.getIntervalCount()-1)));
-
-        // Get sampling times
-        //samplingTimes = getSamplingTimes(intervalTimes);
-
         // Get sampling intensity cumulative group sizes and times
         cumulativeSamplingIntensityGroupSizes[0] = samplingIntensityGroupSizes.getValue(0);
         samplingIntensityGroupTimes[0]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[0]-1];
@@ -265,36 +258,6 @@ public class PrefBSP extends BSP {
             cumulativeSamplingIntensityGroupSizes[i] = cumulativeSamplingIntensityGroupSizes[i-1] + samplingIntensityGroupSizes.getValue(i);
             samplingIntensityGroupTimes[i]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[i]-1];
         }
-
-
-
-
-        /*
-        // Get popsize cumulative group sizes and times (and extract sampling times)
-        cumulativePopSizeGroupSizes[0] = popSizeGroupSizes.getValue(0);
-        popSizeGroupTimes[0]           = intervals.getIntervalTime(cumulativePopSizeGroupSizes[0]-1);
-        for (int i = 1; i < cumulativePopSizeGroupSizes.length; i++) {
-            cumulativePopSizeGroupSizes[i] = cumulativePopSizeGroupSizes[i-1] + popSizeGroupSizes.getValue(i);
-            popSizeGroupTimes[i]           = intervals.getIntervalTime(cumulativePopSizeGroupSizes[i]-1);
-        }
-
-        //System.out.println((cumulativePopSizeGroupSizes[cumulativePopSizeGroupSizes.length-1]-1)+"\t"+(intervals.getIntervalCount()-1));
-
-        //System.out.println("grouptime: "+popSizeGroupTimes[popSizeGroupTimes.length-1]+"\ttree intervals: "+
-        //        intervals.getIntervalTime(intervals.getIntervalCount()-1) +"\t"+
-        //        (popSizeGroupTimes[popSizeGroupTimes.length-1] == intervals.getIntervalTime(intervals.getIntervalCount()-1)));
-
-        // Get sampling times
-        samplingTimes = getSamplingTimes();
-
-        // Get sampling intensity cumulative group sizes and times
-        cumulativeSamplingIntensityGroupSizes[0] = samplingIntensityGroupSizes.getValue(0);
-        samplingIntensityGroupTimes[0]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[0]-1];
-        for (int i = 1; i < cumulativeSamplingIntensityGroupSizes.length; i++) {
-            cumulativeSamplingIntensityGroupSizes[i] = cumulativeSamplingIntensityGroupSizes[i-1] + samplingIntensityGroupSizes.getValue(i);
-            samplingIntensityGroupTimes[i]           = samplingTimes[cumulativeSamplingIntensityGroupSizes[i]-1];
-        }
-         */
 
         arraysUpdated = true;
     }
@@ -312,8 +275,6 @@ public class PrefBSP extends BSP {
                currentPopSize,
                currentSamplingIntensity;
 
-        //System.out.println("Calculating likelihood...");
-
         // Update arrays
         if (!arraysUpdated) {
             updateArrays();
@@ -322,9 +283,6 @@ public class PrefBSP extends BSP {
                 return Double.NEGATIVE_INFINITY;
             }
         }
-
-        //System.out.println(Arrays.toString(samplingTimes));
-        //System.out.println(Arrays.toString(cumulativeSamplingIntensityGroupSizes));
 
         // Get likelihood for each segment
         logP = 0.0;
@@ -358,7 +316,6 @@ public class PrefBSP extends BSP {
 
     /**
      * Calculates the log-likelihood of an interval under the coalescent with constant population size
-     * (Copied and simplified from BayesianSkyline.java)
      *
      * @param popSize
      * @param beta
@@ -401,12 +358,12 @@ public class PrefBSP extends BSP {
         double start  = 0.0;
         String outstr = super.toString();
 
-        outstr += String.format("%10s  %10s | %7s  %7s  %7s | %10s\n"+
+        outstr += String.format("%10s  %10s | %10s  %10s  %10s | %10s\n"+
                         "------------------------------------------------------------------------------\n",
                 "group", "size", "start", "end", "width", "samplingIntensity");
 
         for (int i = 0; i < samplingIntensityGroupSizes.getDimension(); i++) {
-            outstr += String.format("%10s  %10s | %4.5f  %4.5f  %4.5f | %10s\n",
+            outstr += String.format("%10s  %10s | %10.5f  %10.5f  %10.5f | %10.5f\n",
                     i+1, samplingIntensityGroupSizes.getValue(i), start, samplingIntensityGroupTimes[i],
                     samplingIntensityGroupTimes[i]-start, samplingIntensity.getValue(i));
             start = samplingIntensityGroupTimes[i];
@@ -439,7 +396,7 @@ public class PrefBSP extends BSP {
 
 
     /**
-     * TODO: Check boundary conditions
+     * TODO: Check boundary conditions (probably needs to be changed)
      *
      * @param t
      * @return
