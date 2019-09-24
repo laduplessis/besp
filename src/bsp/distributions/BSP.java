@@ -18,18 +18,21 @@ import java.util.Arrays;
 
 import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
 
-/**
- * Bayesian Skyline Plot implementation.
+/*****************************************
+ * Bayesian Skyline Plot implementation. *
+ *****************************************
  *
- * This implementation will return the same likelihood as
- * beast.evolution.tree.coalescent.BayesianSkyline, but will hopefully also be faster
- *
- * This implementation makes use of the TreeIntervals class, like the original BayesianSkyline
- *
- * Only one parameter (popSizes) which can only change at coalescent times, which are grouped with
- * popSizeGroupSizes.
- *
- * Times for groups are logged as well and there is a minimum width for each group.
+ * - This implementation will return the same likelihood as
+ *   beast.evolution.tree.coalescent.BayesianSkyline, but will hopefully also be faster
+ * - This implementation makes use of the TreeIntervals class, like the original BayesianSkyline
+ * - Only one parameter (popSizes) which can change only at coalescent times, which are grouped with
+ *   popSizeGroupSizes.
+ * - Instead of specifying the input groupSizes, the change times for population sizes can be specified as input
+ *   Of course, these will be adjusted to coincide with coalescent times on the input tree, and if group sizes
+ *   are sampled will not stay the same over the course of the MCMC chain
+ * - Times for groups can be logged as well and there is a minimum width for each group.
+ * - Tests showed no real speed advantage to storing and restoring arrays instead of just always updating at every
+ *   sample
  *
  * @author Louis du Plessis
  * @date 2019/01/20
@@ -42,6 +45,7 @@ import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
 @Citation(value="Parag, K.V., du Plessis, L., Pybus, O.G. (2019).\n"+
                 "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.\n",
                 year = 2019, firstAuthorSurname = "Parag", DOI="10.1101/686378")
+
 public class BSP extends TreeDistribution {
 
     final public Input<RealParameter> popSizeInput =
@@ -288,6 +292,7 @@ public class BSP extends TreeDistribution {
         return popSizes.getDimension();
     }
 
+
     /**
      * Return the i'th change time of the skyline parameter (for logging and skyline reconstruction)
      *
@@ -304,7 +309,13 @@ public class BSP extends TreeDistribution {
 
 
     /**
-     * TODO: Check boundary conditions
+     * Return popSize, N(t), at some time point
+     *
+     * For popSize segment j, N(t) = N_j on [t_{j-1}, t_{j})
+     * That is, N(t) = N_j   t_{j-1} <= t < t_j
+     *
+     * This is slightly different to the original Bayesian Skyline Plot implementation when there are multiple
+     * coalescent events at the same time and the segment boundary is between them
      *
      * @param t
      * @return
@@ -312,10 +323,10 @@ public class BSP extends TreeDistribution {
     public double getPopSize(double t) {
 
         int groupIndex = Arrays.binarySearch(popSizeGroupTimes, t);
+
+        // t is not one of the segment times (popSizeGroupTimes)
         if (groupIndex < 0) {
             groupIndex = -groupIndex - 1;
-        } else {
-            groupIndex++;
         }
 
         return popSizes.getValue(Math.min(groupIndex, popSizes.getDimension()-1));
@@ -365,8 +376,13 @@ public class BSP extends TreeDistribution {
     /*****************************************************/
 
 
-
-
+    /**
+     * Check that no group spans less than minWidth time
+     *
+     * @param groupTimes
+     * @param minWidth
+     * @return
+     */
     protected boolean checkGroupWidths(double [] groupTimes, double minWidth) {
 
         double width, prev = 0.0;
@@ -403,7 +419,6 @@ public class BSP extends TreeDistribution {
         return true;
 
     }
-
 
 
     /**
@@ -575,7 +590,9 @@ public class BSP extends TreeDistribution {
      *
      * Make it verbose, since it's only called once
      *
-     * When assigning by epoch the bounds can be changed, if initial assignment doesn't respect bounds
+     * When assigning by epoch the bounds may be changed, if initial assignment doesn't respect bounds
+     *
+     * @TODO Method should not be in this class! - Used for popSizeEpochTimes input
      */
     protected IntegerParameter epochsToGroups(double [] eventtimes, Double [] epochtimes, int lower, int upper) {
 
