@@ -173,6 +173,8 @@ public class BSP extends TreeDistribution {
             i++;
         }
 
+        System.out.println(this.toString());
+
     }
 
     /**

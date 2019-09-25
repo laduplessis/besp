@@ -288,13 +288,6 @@ public class BESP extends BSP {
         logP = 0.0;
         for (int i = 0; i < intervals.getIntervalCount(); i++) {
 
-            // Next sampling intensity group
-            if (intervals.getIntervalType(i) == SAMPLE) {
-                sampleIndex++;
-                if (sampleIndex > cumulativeSamplingIntensityGroupSizes[samplingIntensityGroup])
-                    samplingIntensityGroup++;
-            }
-
             // Next population size group
             if (i >= cumulativePopSizeGroupSizes[popSizeGroup]) {
                 popSizeGroup++;
@@ -303,12 +296,17 @@ public class BESP extends BSP {
             width = intervals.getInterval(i);
             currentTime += width;
 
-            //System.out.println(samplingIntensityGroup);
-
             currentPopSize           = popSizes.getArrayValue(popSizeGroup);
-            currentSamplingIntensity = currentTime <= samplingTimes[samplingTimes.length-1] ? samplingIntensity.getValue(samplingIntensityGroup) : 0.0;
+            currentSamplingIntensity = currentTime <= samplingTimes[samplingTimes.length-1] ? samplingIntensity.getArrayValue(samplingIntensityGroup) : 0.0;
 
             logP += calculateIntervalLikelihood(currentPopSize, currentSamplingIntensity, width, intervals.getLineageCount(i), intervals.getIntervalType(i));
+
+            // Next sampling intensity group
+            if (intervals.getIntervalType(i) == SAMPLE) {
+                sampleIndex++;
+                if (sampleIndex >= cumulativeSamplingIntensityGroupSizes[samplingIntensityGroup])
+                    samplingIntensityGroup++;
+            }
         }
 
         return logP;
