@@ -35,7 +35,7 @@ public class BESPTest extends TestCase {
     public void testBESPTreeLikelihood1 () {
 
         System.out.println("BESP compared to BSP: " +
-                "Tree with homochronous sampling (likelihood should be identical).");
+                "Tree with homochronous sampling (likelihood should be identical if popSizes[0] = 1).");
 
         Tree tree = new TreeParser("((D4Philip56:30.0,(D4Philip64:23.0,D4Philip84:23.0):7.0):10.0,(D4SLanka78:25.0,(D4Thai78:11.0,D4Thai84:11.0):14.0):15.0);",false);
         TreeIntervals intervals = new TreeIntervals(tree);
