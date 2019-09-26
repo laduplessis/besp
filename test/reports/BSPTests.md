@@ -1,7 +1,7 @@
 ---
 title: "Bayesian Skyline Plot tests"
 author: "Louis du Plessis"
-date: 'Last modified: 19 Sep 2019'
+date: 'Last modified: 26 Sep 2019'
 output:
   html_document:
     toc: yes
@@ -171,15 +171,13 @@ Pass test: **TRUE**
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] rskylinetools_0.1.0 beastio_0.2.1      
+## [1] rskylinetools_0.1.1 beastio_0.2.2      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] subplex_1.5-4   Rcpp_1.0.1      mvtnorm_1.0-10  ape_5.3        
-##  [5] lattice_0.20-38 digest_0.6.19   MASS_7.3-51.4   grid_3.5.1     
-##  [9] nlme_3.1-139    magrittr_1.5    evaluate_0.13   coda_0.19-3    
-## [13] stringi_1.4.3   rmarkdown_1.12  deSolve_1.21    tools_3.5.1    
-## [17] stringr_1.4.0   geiger_2.0.6.1  parallel_3.5.1  xfun_0.6       
-## [21] yaml_2.2.0      compiler_3.5.1  htmltools_0.3.6 knitr_1.22     
-## [25] TreeSim_2.4
+##  [1] Rcpp_1.0.2      ape_5.3         lattice_0.20-38 digest_0.6.21  
+##  [5] grid_3.5.1      nlme_3.1-139    magrittr_1.5    evaluate_0.13  
+##  [9] coda_0.19-3     stringi_1.4.3   rmarkdown_1.12  tools_3.5.1    
+## [13] stringr_1.4.0   parallel_3.5.1  xfun_0.6        yaml_2.2.0     
+## [17] compiler_3.5.1  htmltools_0.3.6 knitr_1.22
 ```
 
