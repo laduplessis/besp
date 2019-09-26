@@ -61,7 +61,7 @@ public class BSP extends TreeDistribution {
             new Input<>("minWidth","Minimum width of a group (end-start)",0.0);
 
     final public Input<Integer> numInitializationAttemptsInput =
-            new Input<>("numInitializationAttempts","Number of times to try to initialize the group sizes"+
+            new Input<>("numInitializationAttempts","Number of times to try to initialize the group sizes "+
                               "if the minimum group width constraint is not satisfied",10000);
 
     protected TreeIntervals intervals;
