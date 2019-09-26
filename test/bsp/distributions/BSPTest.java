@@ -15,7 +15,7 @@ import test.beast.BEASTTestCase;
  *
  * - Compare likelihood to the classical and generalized skyline plots in Ape
  * - Compare likelihood to the original Bayesian Skyline Plot implementation in BEAST2 core (beast.evolution.tree.coalescent.BayesianSkyline.java)
- * - Test methods for getting change times and population size at different segments
+ * - Test methods for getting segment change times
  * - Test methods for getting population size at different times (this is slightly different to the original Bayesian Skyline Plot)
  *
  *
@@ -409,7 +409,7 @@ public class BSPTest extends TestCase {
 
     @Test
     public void testGetPopSize2() {
-        System.out.println("Getting population size: Tree with homochronous sampling.");
+        System.out.println("Getting population size: Tree with heterochronous sampling.");
 
         Tree tree = new TreeParser("((((D4Mexico84:5.0,D4ElSal94:15.0):1.0,D4PRico86:8.0):1.0,D4Tahiti79:2.0):5.0,D4Indon77:5.0);",false);
         TreeIntervals intervals = new TreeIntervals(tree);
@@ -446,7 +446,7 @@ public class BSPTest extends TestCase {
 
     @Test
     public void testGetPopSize3() {
-        System.out.println("Getting population size: Tree with homochronous sampling.");
+        System.out.println("Getting population size: Tree with heterochronous sampling (multiple events on segment boundary).");
 
         Tree tree = new TreeParser("((D4Philip56:2.0,(D4Philip64:3.0,D4Philip84:23.0):7.0):10.0,(D4SLanka78:17.0,(D4Thai78:5.0,D4Thai84:11.0):12.0):17.0);",false);
         TreeIntervals intervals = new TreeIntervals(tree);

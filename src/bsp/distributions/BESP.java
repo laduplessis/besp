@@ -216,7 +216,7 @@ public class BESP extends BSP {
             i++;
         }
 
-        System.out.println(this.toString());
+        // System.out.println(this.toString());
 
     }
 
@@ -404,11 +404,13 @@ public class BESP extends BSP {
         int groupIndex = Arrays.binarySearch(samplingIntensityGroupTimes, t);
         if (groupIndex < 0) {
             groupIndex = -groupIndex - 1;
-        } else {
-            groupIndex++;
-        }
+        } //else {
+          //  groupIndex++;
+        //}
 
-        return popSizes.getValue(Math.min(groupIndex, samplingIntensity.getDimension()-1));
+        return t <= samplingTimes[samplingTimes.length-1] ? samplingIntensity.getArrayValue(groupIndex) : 0.0;
+
+        //return samplingIntensity.getValue(Math.min(groupIndex, samplingIntensity.getDimension()-1));
     }
 
 
