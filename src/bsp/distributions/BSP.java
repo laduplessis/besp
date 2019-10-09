@@ -43,7 +43,7 @@ import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
                 "  Molecular biology and evolution, 22(5), 1185-1192.",
                 year = 2005, firstAuthorSurname = "Drummond", DOI="10.1093/molbev/msi103")
 @Citation(value="Parag, K.V., du Plessis, L., Pybus, O.G. (2019).\n"+
-                "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.\n",
+                "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.",
                 year = 2019, firstAuthorSurname = "Parag", DOI="10.1101/686378")
 
 public class BSP extends TreeDistribution {

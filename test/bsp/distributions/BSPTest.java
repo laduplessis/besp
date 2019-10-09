@@ -156,7 +156,7 @@ public class BSPTest extends TestCase {
         double logP2 = skyline2.calculateLogP();
 
         assertEquals(logP2, logP1);
-        //System.out.println(logP1+"\t"+logP2);
+        System.out.println(logP1+"\t"+logP2);
     }
 
 
@@ -179,7 +179,7 @@ public class BSPTest extends TestCase {
         double logP2 = skyline2.calculateLogP();
 
         assertEquals(logP2, logP1);
-        //System.out.println(logP1+"\t"+logP2);
+        System.out.println(logP1+"\t"+logP2);
         System.out.println(skyline1);
 
 
@@ -205,7 +205,7 @@ public class BSPTest extends TestCase {
         double logP2 = skyline2.calculateLogP();
 
         assertEquals(logP2, logP1);
-        //System.out.println(logP1+"\t"+logP2);
+        System.out.println(logP1+"\t"+logP2);
 
     }
 
@@ -229,7 +229,7 @@ public class BSPTest extends TestCase {
         double logP2 = skyline2.calculateLogP();
 
         assertEquals(logP2, logP1);
-        //System.out.println(logP1+"\t"+logP2);
+        System.out.println(logP1+"\t"+logP2);
 
     }
 
@@ -256,7 +256,7 @@ public class BSPTest extends TestCase {
         double logP2 = skyline2.calculateLogP();
 
         assertEquals(logP2, logP1);
-        //System.out.println(logP1+"\t"+logP2);
+        System.out.println(logP1+"\t"+logP2);
 
     }
 

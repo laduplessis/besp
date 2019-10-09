@@ -78,7 +78,7 @@ public class BESPTest extends TestCase {
         double logP1 = skyline1.calculateLogP();
 
         assertEquals(-56.2274112777602, logP1, BEASTTestCase.PRECISION);
-        // System.out.println(logP1);
+        System.out.println(logP1);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class BESPTest extends TestCase {
         double logP1 = skyline1.calculateLogP();
 
         assertEquals(-183.8716748273099, logP1, BEASTTestCase.PRECISION);
-        System.out.println(logP1);
+        //System.out.println(logP1);
     }
 
     @Test

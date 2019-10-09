@@ -28,7 +28,7 @@ import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
  */
 @Description("BESP: A likelihood function for epoch sampling skyline plot coalescent.")
 @Citation(value="Parag, K.V., du Plessis, L., Pybus, O.G. (2019).\n"+
-        "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.\n",
+        "  Jointly inferring the dynamics of population size and sampling intensity from molecular sequences.",
         year = 2019, firstAuthorSurname = "Parag", DOI="10.1101/686378")
 
 public class BESP extends BSP {
