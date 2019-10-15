@@ -1,0 +1,8 @@
+<packages>
+    <package name="besp" version="0.1.0"
+        url="https://github.com/laduplessis/besp/releases/download/0.1.0/besp.v0.1.0.zip"
+        projectURL="https://github.com/laduplessis/besp/"
+        description="The Bayesian Epoch Sampling Skyline Plot">
+        <depends on="beast2" atleast="2.5" atmost="2.6.9"/>
+    </package>
+</packages>
