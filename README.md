@@ -2,6 +2,7 @@
 
 This [BEAST 2](https://beast2.org) package contains implementations of the the Bayesian Skyline Plot (BSP) and the Bayesian Epoch Sampling Skyline Plot (BESP) in BEAST2. 
 
+[![Build Status](https://travis-ci.com/laduplessis/besp.svg?branch=master)](https://travis-ci.com/laduplessis/besp)
 
 ## Citation
 
