@@ -1,6 +1,0 @@
-<addon name="besp" version="0.0.4">
-            <depends on="BEAST" atleast="2.5.0"/>
-
-            <!-- Add other dependencies as necessary. -->
-            </addon>
-        
