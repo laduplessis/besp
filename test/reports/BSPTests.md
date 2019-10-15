@@ -1,7 +1,7 @@
 ---
 title: "Bayesian Skyline Plot tests"
 author: "Louis du Plessis"
-date: 'Last modified: 26 Sep 2019'
+date: 'Last modified: 14 Oct 2019'
 output:
   html_document:
     toc: yes
@@ -171,7 +171,7 @@ Pass test: **TRUE**
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] rskylinetools_0.1.1 beastio_0.2.2      
+## [1] rskylinetools_0.2.1 beastio_0.2.4      
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_1.0.2      ape_5.3         lattice_0.20-38 digest_0.6.21  
