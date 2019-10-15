@@ -1,11 +1,12 @@
 # The Bayesian Epoch Sampling Skyline Plot
 
-This [BEAST 2]() package contains implementations of the the Bayesian Skyline Plot (BSP) and the Bayesian Epoch Sampling Skyline Plot (BESP) in BEAST2. 
+This [BEAST 2](https://beast2.org) package contains implementations of the the Bayesian Skyline Plot (BSP) and the Bayesian Epoch Sampling Skyline Plot (BESP) in BEAST2. 
 
 
 ## Citation
 
 KV Parag, L du Plessis, OG Pybus (2019) _Jointly inferring the dynamics of population size and sampling intensity from molecular sequences_ [https://doi.org/10.1101/686378](https://doi.org/10.1101/686378)
+
 
 ## Installation
 
@@ -18,6 +19,7 @@ To install BESP:
 5. Select "Add URL" and enter the following URL: `https://laduplessis.github.io/besp/package.xml`.
 7. Click the "Done" button, then select "besp" from the list of packages.
 8. Click the "Install/Upgrade" button. Once installation is complete, XML files with BESP classes can be used in BEAST2.
+
 
 ## Building package from source
 
