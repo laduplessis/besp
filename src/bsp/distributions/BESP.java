@@ -8,7 +8,6 @@ import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.tree.coalescent.IntervalType;
 import beast.math.Binomial;
-import org.omg.SendingContext.RunTime;
 
 import java.util.Arrays;
 
