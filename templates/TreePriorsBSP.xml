@@ -76,82 +76,6 @@
         
         </fragment>
 
-
-        <fragment id="BESP_params" spec="beast.app.beauti.Fragment">
-
-            <![CDATA[
-
-            <!-- Population size prior -->
-            <distribution id='$(b)MarkovChainedPopSizes.t:$(n)' spec="beast.math.distributions.MarkovChainDistribution" 
-                        jeffreys="true"
-                        parameter="@$(b)PopSizes.t:$(n)"/>
-
-            <!-- Sampling intensity prior -->
-            <prior id="$(b)SamplingIntensityPrior.t:$(n)" name="distribution" x="@$(b)SamplingIntensity.t:$(n)">
-                <Exponential name="distr" mean="1.0"/>
-            </prior>
-
-            <!-- Operators -->
-            <operator id='$(b)PopSizesScaler.t:$(n)' spec='ScaleOperator' scaleFactor="0.75" weight="15" parameter="@$(b)PopSizes.t:$(n)"/>
-            <operator id='$(b)GroupSizesDelta.t:$(n)' spec='DeltaExchangeOperator' delta="1" weight="6" integer="true"
-                      intparameter="@$(b)GroupSizes.t:$(n)"/>
-            <operator id="$(b)SamplingIntensityScaler.t:$(n)" spec="ScaleOperator" parameter="@$(b)SamplingIntensity.t:$(n)" scaleFactor="0.5" weight="2.0"/>
-
-            <!-- Change-point time loggers -->
-            <plugin id="$(b)PopSizeChangeTimes.t:$(n)" spec="bsp.util.popSizeChangeTimeLogger" skyline="@$(b).t:$(n)"/>        
-            <plugin id="$(b)SamplingIntensityChangeTimes.t:$(n)" spec="bsp.util.samplingIntensityChangeTimeLogger" skyline="@$(b).t:$(n)"/>     
-
-
-            ]]>
-
-            <!-- Connect parameters to state -->
-            <connect srcID='$(b)PopSizes.t:$(n)' targetID='state' inputName='stateNode'
-                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'/>
-            <connect srcID='$(b)SamplingIntensity.t:$(n)' targetID='state' inputName='stateNode'
-                     if='inposterior($(b).t:$(n)) and $(b)SamplingIntensity.t:$(n)/estimate=true'/>
-            <connect srcID='$(b)GroupSizes.t:$(n)' targetID='state' inputName='stateNode'
-                     if='inposterior($(b).t:$(n)) and $(b)GroupSizes.t:$(n)/estimate=true'/>
-
-
-            <!-- Connect prior distributions to prior -->
-            <connect srcID='$(b).t:$(n)' targetID='prior' inputName='distribution'
-                     if='inposterior($(b).t:$(n)) and Tree.t:$(n)/estimate=true'>Coalescent with BESP tree t:$(n)
-            </connect>
-            <connect srcID='$(b)MarkovChainedPopSizes.t:$(n)' targetID='prior' inputName='distribution'
-                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'>Markov chained prior on population sizes of BESP
-            </connect>
-            <connect srcID='$(b)SamplingIntensityPrior.t:$(n)' targetID='prior' inputName='distribution'
-                     if='inposterior($(b).t:$(n)) and $(b)SamplingIntensity.t:$(n)/estimate=true'>Prior on sampling intensity of BESP
-            </connect>
-
-
-            <!-- Connect operators -->                                
-            <connect srcID='$(b)PopSizesScaler.t:$(n)' targetID='mcmc' inputName='operator'
-                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'>Scale population size of BESP prior of tree t:$(n)
-            </connect>
-            <connect srcID='$(b)SamplingIntensityScaler.t:$(n)' targetID='mcmc' inputName='operator'
-                     if='inposterior($(b).t:$(n)) and $(b)SamplingIntensity.t:$(n)/estimate=true'>Scale sampling intensity of BESP prior of tree t:$(n)
-            </connect>                
-            <connect srcID='$(b)GroupSizesDelta.t:$(n)' targetID='mcmc' inputName='operator'
-                     if='inposterior($(b).t:$(n)) and $(b)GroupSizes.t:$(n)/estimate=true'>Exchange group sizes of BESP prior of tree t:$(n)
-            </connect>
-            
-
-            <!-- Connect parameters to tracelog -->
-            <connect srcID='$(b).t:$(n)' targetID='tracelog' inputName='log'
-                     if='inposterior($(b).t:$(n))'/>
-            <connect srcID='$(b)PopSizes.t:$(n)' targetID='tracelog' inputName='log'
-                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'/>            
-            <connect srcID='$(b)SamplingIntensity.t:$(n)' targetID='tracelog' inputName='log'
-                     if='inposterior($(b).t:$(n)) and $(b)SamplingIntensity.t:$(n)/estimate=true'/>            
-            <connect srcID='$(b)GroupSizes.t:$(n)' targetID='tracelog' inputName='log'
-                     if='inposterior($(b).t:$(n)) and $(b)GroupSizes.t:$(n)/estimate=true'/>
-            <connect srcID='$(b)PopSizeChangeTimes.t:$(n)' targetID='tracelog' inputName='log'
-                     if='inposterior($(b).t:$(n))'/>            
-            <connect srcID='$(b)SamplingIntensityChangeTimes.t:$(n)' targetID='tracelog' inputName='log'
-                     if='inposterior($(b).t:$(n))'/>           
-        
-        </fragment>
     </mergewith>
 
 
@@ -187,39 +111,6 @@
             
 
         </subtemplate>
-        
-
-        <!-- Coalescent BESP -->        
-        <subtemplate id='CoalescentBESP' class='bsp.distributions.BESP'
-                     mainid='BESP.t:$(n)'
-                     suppressInputs='beast.math.distributions.MarkovChainDistribution.parameter,                                     
-                                     bsp.distributions.BESP.tree,
-                                     bsp.distributions.BESP.treeIntervals,
-                                     bsp.distributions.BESP.popSizeEpochTimes,
-                                     bsp.distributions.BESP.samplingIntensityGroupSizes,
-                                     bsp.distributions.BESP.samplingEpochTimes,
-                                     bsp.distributions.BESP.numInitializationAttempts'>
-
-            <plate var="b" range="BESP">
-
-                <![CDATA[
-
-                    <distribution spec="bsp.distributions.BESP" id='$(b).t:$(n)'>
-                        <parameter name='popSizes' id='$(b)PopSizes.t:$(n)' dimension="5" value="380.0" lower="0.0" estimate='true'/>
-                        <parameter name='samplingIntensity' id='$(b)SamplingIntensity.t:$(n)' dimension="1" value="1" lower="0.0" estimate='true'/>
-                        <popSizeGroupSizes spec='parameter.IntegerParameter' id='$(b)GroupSizes.t:$(n)' dimension='5' value='1' estimate='true'/>
-                        <treeIntervals spec='TreeIntervals' id='$(b)TreeIntervals.t:$(n)' tree='@Tree.t:$(n)'/>
-                    </distribution>
-                   
-                ]]>
-
-            </plate>
-
-            <plate fragment="TreeOperators" var="m" range="BESP"/>
-            <plate fragment="BESP_params" var="b" range="BESP"/>
-
-        </subtemplate>
-
 
     </mergewith>
 
