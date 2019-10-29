@@ -1,4 +1,4 @@
-<addon name="besp" version="0.1.0">
+<addon name="besp" version="0.2.0">
             <depends on="BEAST" atleast="2.5.0"/>
 
             <!-- Add other dependencies as necessary. -->
