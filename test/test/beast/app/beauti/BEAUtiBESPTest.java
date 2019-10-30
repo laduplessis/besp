@@ -11,7 +11,7 @@ public class BEAUtiBESPTest extends BeautiBase {
     @Test
     public void beautiBSPTest() throws Exception {
         warning("Load Flu.nex");
-        importAlignment("examples/nexus", new File("Flu.nex"));
+        importAlignment("../beast2/examples/nexus", new File("Flu.nex"));
 
         JTabbedPaneFixture f = beautiFrame.tabbedPane();
         f.selectTab("Priors");
@@ -26,7 +26,7 @@ public class BEAUtiBESPTest extends BeautiBase {
     @Test
     public void beautiBESPTest() throws Exception {
         warning("Load Flu.nex");
-        importAlignment("examples/nexus", new File("Flu.nex"));
+        importAlignment("../beast2/examples/nexus", new File("Flu.nex"));
 
         JTabbedPaneFixture f = beautiFrame.tabbedPane();
         f.selectTab("Priors");

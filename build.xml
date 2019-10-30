@@ -106,6 +106,10 @@
         <copy todir="${build-lib}">
             <fileset dir="${beastDir}/lib" includes="*.jar"/>
         </copy>
+        <copy todir="${build}">
+            <fileset dir="${beastDir}/src"
+                     includes="**/*.png" />
+        </copy>
 
         <delete dir="${build-beast}" />
     </target>
@@ -165,6 +169,7 @@
             <batchtest fork="yes" todir="${test-reports}">
                 <fileset dir="${test}">
                     <include name="**/*Test.java"/>
+                    <!--exclude name="**/BEAUti*.java"/-->
                 </fileset>
                 <formatter type="plain"/>
                 <!--formatter type="plain" usefile="false"/--> <!-- to screen -->
@@ -235,6 +240,7 @@
         <delete dir="${dist}" />
         <delete dir="${build-test}" />
         <delete dir="${test-reports}" />
+        <delete dir="${build-beast}" />
     </target>
 
 
