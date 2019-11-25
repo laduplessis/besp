@@ -1,7 +1,10 @@
-language: java
+sudo: require
 
-install: ant build 
+services:
+    - docker
 
-before_script: sudo apt-get install ant-optional
+before_install:
+    - docker build -t docker-image .
 
-script: ant test
+script:
+    - docker run docker-image
