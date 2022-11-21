@@ -1,7 +1,7 @@
 package test.beast.app.beauti;
 
-import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.junit.Test;
+import test.beastfx.app.beauti.BeautiBase;
 
 import java.io.File;
 
@@ -11,7 +11,7 @@ public class BEAUtiBESPTest extends BeautiBase {
     @Test
     public void beautiBSPTest() throws Exception {
         warning("Load Flu.nex");
-        importAlignment("../beast2/examples/nexus", new File("Flu.nex"));
+        importAlignment(NEXUS_DIR, new File("Flu.nex"));
 
         JTabbedPaneFixture f = beautiFrame.tabbedPane();
         f.selectTab("Priors");

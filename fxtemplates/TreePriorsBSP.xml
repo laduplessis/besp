@@ -1,0 +1,115 @@
+<beast version='2.7'
+       namespace="beast.base.core:beast.base.inference
+                 :beast.base.evolution.alignment
+                 :beast.base.evolution.tree.coalescent
+                 :beast.base.util
+                 :beast.base.inference.parameter
+                 :beast.base.evolution.nuc
+                 :beast.base.evolution.operator:beast.base.inference.operator
+                 :beast.base.evolution.sitemodel
+                 :beast.base.evolution.substitutionmodel
+                 :beast.base.evolution.likelihood
+                 :bsp.distributions
+                 :bsp.util" >
+
+
+    <mergewith point='misc' fragment="@TreeOperators"/>
+
+
+    <mergewith point='misc'>
+        <fragment id="BSP_params" spec="beastfx.app.beauti.Fragment">
+
+            <![CDATA[
+
+            <!-- Population size prior -->
+            <distribution id='$(b)MarkovChainedPopSizes.t:$(n)' spec="beast.base.inference.distribution.MarkovChainDistribution" 
+                        jeffreys="true"
+                        parameter="@$(b)PopSizes.t:$(n)"/>
+            
+            <!-- Operators -->
+            <operator id='$(b)PopSizesScaler.t:$(n)' spec='ScaleOperator' scaleFactor="0.75" weight="15" parameter="@$(b)PopSizes.t:$(n)"/>
+            <operator id='$(b)GroupSizesDelta.t:$(n)' spec='DeltaExchangeOperator' delta="1" weight="6" integer="true"
+                      intparameter="@$(b)GroupSizes.t:$(n)"/>
+
+            <!-- Change-point time loggers -->
+            <plugin id="$(b)PopSizeChangeTimes.t:$(n)" spec="bsp.util.popSizeChangeTimeLogger" skyline="@$(b).t:$(n)"/>        
+
+            ]]>
+
+            <!-- Connect parameters to state -->
+            <connect srcID='$(b)PopSizes.t:$(n)' targetID='state' inputName='stateNode'
+                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'/>
+            <connect srcID='$(b)GroupSizes.t:$(n)' targetID='state' inputName='stateNode'
+                     if='inposterior($(b).t:$(n)) and $(b)GroupSizes.t:$(n)/estimate=true'/>
+
+
+            <!-- Connect prior distributions to prior -->
+            <connect srcID='$(b).t:$(n)' targetID='prior' inputName='distribution'
+                     if='inposterior($(b).t:$(n)) and Tree.t:$(n)/estimate=true'>Coalescent with BSP tree t:$(n)
+            </connect>
+            <connect srcID='$(b)MarkovChainedPopSizes.t:$(n)' targetID='prior' inputName='distribution'
+                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'>Markov chained prior on population sizes of BSP
+            </connect>
+            
+
+            <!-- Connect operators -->                                
+            <connect srcID='$(b)PopSizesScaler.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'>Scale population size of BSP prior of tree t:$(n)
+            </connect>
+            <connect srcID='$(b)GroupSizesDelta.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior($(b).t:$(n)) and $(b)GroupSizes.t:$(n)/estimate=true'>Exchange group sizes of BSP prior of tree t:$(n)
+            </connect>
+            
+
+            <!-- Connect parameters to tracelog -->
+            <connect srcID='$(b).t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior($(b).t:$(n))'/>
+            <connect srcID='$(b)PopSizes.t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior($(b).t:$(n)) and $(b)PopSizes.t:$(n)/estimate=true'/>            
+            <connect srcID='$(b)GroupSizes.t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior($(b).t:$(n)) and $(b)GroupSizes.t:$(n)/estimate=true'/>
+            <connect srcID='$(b)PopSizeChangeTimes.t:$(n)' targetID='tracelog' inputName='log'
+                     if='inposterior($(b).t:$(n))'/>            
+        
+        </fragment>
+
+    </mergewith>
+
+
+
+ 	<!-- BSP tree prior configurations -->
+    <mergewith point='treePriorTemplates'>
+
+   		<!-- Coalescent BSP -->        
+        <subtemplate id='CoalescentBSP' class='bsp.distributions.BSP'
+                     mainid='BSP.t:$(n)'
+                     suppressInputs='beast.base.inference.distribution.MarkovChainDistribution.parameter,                                     
+                                     bsp.distributions.BSP.tree,
+                                     bsp.distributions.BSP.treeIntervals,
+                                     bsp.distributions.BSP.popSizeEpochTimes,
+                                     bsp.distributions.BSP.numInitializationAttempts'>
+
+            <plate var="b" range="BSP">
+
+                <![CDATA[
+                    <!-- BSP model -->
+    	            <distribution spec="bsp.distributions.BSP" id='$(b).t:$(n)'>
+    	                <parameter name='popSizes' id='$(b)PopSizes.t:$(n)' dimension="5" value="380.0" lower="0.0" estimate='true'/>
+    	                <popSizeGroupSizes spec='parameter.IntegerParameter' id='$(b)GroupSizes.t:$(n)' dimension='5' value='1' estimate='true'/>
+    	                <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id='$(b)TreeIntervals.t:$(n)' tree='@Tree.t:$(n)'/>
+    	            </distribution>
+   	          
+    			]]>
+
+            </plate>
+               
+            <plate fragment="TreeOperators" var="m" range="BSP"/>
+            <plate fragment="BSP_params" var="b" range="BSP"/>
+            
+
+        </subtemplate>
+
+    </mergewith>
+
+
+</beast>

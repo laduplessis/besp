@@ -1,10 +1,10 @@
 package bsp.distributions;
 
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.BayesianSkyline;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.math.Binomial;
-import beast.util.TreeParser;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeIntervals;
+import beast.base.evolution.tree.TreeParser;
+import beast.base.evolution.tree.coalescent.BayesianSkyline;
+import beast.base.util.Binomial;
 import junit.framework.TestCase;
 import org.junit.Test;
 import test.beast.BEASTTestCase;
@@ -14,7 +14,7 @@ import test.beast.BEASTTestCase;
  * Unit tests for bsp.distributions.BSP.java
  *
  * - Compare likelihood to the classical and generalized skyline plots in Ape
- * - Compare likelihood to the original Bayesian Skyline Plot implementation in BEAST2 core (beast.evolution.tree.coalescent.BayesianSkyline.java)
+ * - Compare likelihood to the original Bayesian Skyline Plot implementation in BEAST2 core (beast.base.evolution.tree.coalescent.BayesianSkyline.java)
  * - Test methods for getting segment change times
  * - Test methods for getting population size at different times (this is slightly different to the original Bayesian Skyline Plot)
  *

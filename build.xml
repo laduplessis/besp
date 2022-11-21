@@ -7,10 +7,11 @@
 
     <!-- Location to check for local copy of beast2 repository -->
     <property name="beastDir" location="../beast2"/>
+    <property name="BeastFXpath" location="../BeastFX" />
 
-    <!-- BEAST 2 currently uses Java 1.8 -->
-    <property name="sourceVersion" value="1.8"/>
-    <property name="targetVersion" value="1.8"/>
+    <!-- BEAST 2 currently uses Java 17 -->
+    <property name="sourceVersion" value="17"/>
+    <property name="targetVersion" value="17"/>
 
     <!-- Directories necessary for all BEAST 2 packages -->
     <property name="doc" location="doc"/>
@@ -44,8 +45,8 @@
 
         <!-- Read package name and version from xml file -->
         <xmlproperty file="version.xml" prefix="fromVersionFile" />
-        <property name="projName" value="${fromVersionFile.addon(name)}" />
-        <property name="projVersion" value="${fromVersionFile.addon(version)}" />
+        <property name="projName" value="${fromVersionFile.package(name)}" />
+        <property name="projVersion" value="${fromVersionFile.package(version)}" />
 
         <mkdir dir="${build}"/>
         <mkdir dir="${build-lib}"/>
@@ -65,7 +66,7 @@
     <target name="build-remote-beast" depends="find-beast" unless="localBeastAvailable">
         <echo>No local copy of the beast2 source found at ${beastDir}.</echo>
         <echo>Compiling against version ${beast-version} from GitHub.</echo>
-
+        <!--  TODO not tested    -->
         <property name="build-beast" location="build-beast"/>
         <mkdir dir="${build-beast}"/>
 
@@ -80,10 +81,27 @@
                 <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
             </classpath>
         </javac>
-        <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}/beast2-${beast-version}/build" />
         <copy todir="${build-lib}">
             <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
         </copy>
+        <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}/beast2-${beast-version}/build" />
+
+        <get src="https://github.com/CompEvol/BeastFX/archive/${beast-branch}.zip" dest="${build-beast}/beastFX.zip"/>
+        <unzip src="${build-beast}/beastFX.zip" dest="${build-beast}"/>
+        <mkdir dir="${build-beast}/beastFX-${beast-version}/build"/>
+        <!-- Java FX  -->
+        <!-- if Zulu is not installed, it can specify javac, e.g. add  -->
+        <!-- executable="../../Downloads/zulu17.36.13-ca-fx-jdk17.0.4-macosx_x64/bin/javac"  -->
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${build-beast}/beastFX-${beast-version}/src"
+               destdir="${build-beast}/beastFX-${beast-version}/build"
+               fork="true"  includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-lib}" includes="*.jar"/>
+            </classpath>
+        </javac>
+        <jar jarfile="${build-lib}/beastFX.jar" basedir="${build-beast}/beastFX-${beast-version}/build" />
 
         <delete dir="${build-beast}" />
     </target>
@@ -95,21 +113,30 @@
         <mkdir dir="${build-beast}"/>
 
         <javac target="${targetVersion}" source="${sourceVersion}"
-            srcdir="${beastDir}/src"
-            destdir="${build-beast}" includeantruntime="false">
+               srcdir="${beastDir}/src" destdir="${build-beast}"
+               includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${beastDir}/lib" includes="*.jar"/>
             </classpath>
         </javac>
-        <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}" />
         <copy todir="${build-lib}">
             <fileset dir="${beastDir}/lib" includes="*.jar"/>
         </copy>
-        <copy todir="${build}">
-            <fileset dir="${beastDir}/src"
-                     includes="**/*.png" />
-        </copy>
+
+        <!-- Java FX  -->
+        <!-- if Zulu is not installed, it can specify javac, e.g. add  -->
+        <!-- executable="../../Downloads/zulu17.36.13-ca-fx-jdk17.0.4-macosx_x64/bin/javac"  -->
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${BeastFXpath}/src" destdir="${build-beast}"
+               fork="true"  includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-lib}" includes="*.jar"/>
+            </classpath>
+        </javac>
+
+        <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}" />
 
         <delete dir="${build-beast}" />
     </target>
@@ -144,7 +171,7 @@
         <mkdir dir="${test-reports}"/>
     </target>
 
-
+    <!--  TODO not tested    -->
     <!-- Compile unit tests -->
     <target name="compile-test" depends="init-test,compile,copy-resources">
         <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${test}" destdir="${build-test}" includeantruntime="false">

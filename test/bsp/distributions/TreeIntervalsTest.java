@@ -1,17 +1,17 @@
 package bsp.distributions;
 
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.coalescent.IntervalType;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.util.TreeParser;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeIntervals;
+import beast.base.evolution.tree.TreeParser;
 import junit.framework.TestCase;
 import org.junit.Test;
 
-import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
+import static beast.base.evolution.tree.IntervalType.SAMPLE;
 
 
 /**
- * Unit tests for beast.evolution.tree.coalescent.TreeIntervals.java
+ * Unit tests for beast.base.evolution.tree.TreeIntervals.java
  *
  * These are mostly just to check that TreeIntervals does what I think it does
  *

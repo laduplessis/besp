@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beast beautitemplate='Standard' 
-       beautistatus='' 
-       namespace="beast.core
-                 :beast.evolution.alignment
-                 :beast.evolution.tree.coalescent
-                 :beast.util
-                 :beast.core.util
-                 :beast.evolution.nuc
-                 :beast.evolution.operators
-                 :beast.evolution.sitemodel
-                 :beast.evolution.substitutionmodel
-                 :beast.evolution.likelihood
+       beautistatus=''
+       namespace="beast.base.core:beast.base.inference
+                 :beast.base.evolution.alignment
+                 :beast.base.evolution.tree.coalescent
+                 :beast.base.util
+                 :beast.base.inference.parameter
+                 :beast.base.evolution.nuc
+                 :beast.base.evolution.operator:beast.base.inference.operator
+                 :beast.base.evolution.sitemodel
+                 :beast.base.evolution.substitutionmodel
+                 :beast.base.evolution.likelihood
                  :bsp.distributions
-                 :bsp.util" 
-       required="BEAST v2.5.0" 
-       version="2.5">
+                 :bsp.util"
+       required="BEAST v2.7.2"
+       version="2.7">
 
 
     <data id="bison_2013" name="alignment">
@@ -180,23 +180,23 @@
 
 
     
-<map name="Uniform" >beast.math.distributions.Uniform</map>
-<map name="Exponential" >beast.math.distributions.Exponential</map>
-<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
-<map name="Normal" >beast.math.distributions.Normal</map>
-<map name="Beta" >beast.math.distributions.Beta</map>
-<map name="Gamma" >beast.math.distributions.Gamma</map>
-<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
-<map name="prior" >beast.math.distributions.Prior</map>
-<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
-<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+<map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+<map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Normal" >beast.base.inference.distribution.Normal</map>
+<map name="Beta" >beast.base.inference.distribution.Beta</map>
+<map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+<map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="prior" >beast.base.inference.distribution.Prior</map>
+<map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+<map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
 
 
 <run id="mcmc" spec="MCMC" chainLength="20000000">
     <state id="state" storeEvery="50000000">
 
         <tree id="Tree.t:bison_2013" name="stateNode">
-            <trait id="dateTrait.t:bison_2013" spec="beast.evolution.tree.TraitSet" traitname="date-backward">
+            <trait id="dateTrait.t:bison_2013" spec="beast.base.evolution.tree.TraitSet" traitname="date-backward">
                 U12959_0_0=0,
                 U12958_0_0=0,
                 U12957_0_0=0,
@@ -365,24 +365,24 @@
     </state>
 
     <!-- Initial tree -->
-    <init id="RandomTree.t:bison_2013" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@Tree.t:bison_2013" taxa="@bison_2013">
+    <init id="RandomTree.t:bison_2013" spec="beast.base.evolution.tree.coalescent.RandomTree" estimate="false" initial="@Tree.t:bison_2013" taxa="@bison_2013">
         <populationModel id="ConstantPopulation0.t:bison_2013" spec="ConstantPopulation">
             <parameter id="randomPopSize.t:bison_2013" name="popSize">1.0</parameter>
         </populationModel>
     </init>
 
-    <distribution id="posterior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
 
         <!-- Begin prior -->
-        <distribution id="prior" spec="util.CompoundDistribution">
+        <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
 
             <!-- Treeprior (Bayesian Skyline Plot) -->
             <distribution id="BayesianSkyline.t:bison_2013" spec="BSP" popSizeGroupSizes="@bGroupSizes.t:bison_2013" popSizes="@bPopSizes.t:bison_2013" minWidth="100">
-                <treeIntervals id="BSPTreeIntervals.t:bison_2013" spec="TreeIntervals" tree="@Tree.t:bison_2013"/>
+                <treeIntervals id="BSPTreeIntervals.t:bison_2013" spec="beast.base.evolution.tree.TreeIntervals" tree="@Tree.t:bison_2013"/>
             </distribution>
 
             <!-- Smoothing prior -->
-            <distribution id="MarkovChainedPopSizes.t:bison_2013" spec="beast.math.distributions.MarkovChainDistribution" jeffreys="true" parameter="@bPopSizes.t:bison_2013"/>
+            <distribution id="MarkovChainedPopSizes.t:bison_2013" spec="beast.base.inference.distribution.MarkovChainDistribution" jeffreys="true" parameter="@bPopSizes.t:bison_2013"/>
 
             <!-- Site and clock model priors --> 
             <prior id="KappaPrior.s:bison_2013" name="distribution" x="@kappa.s:bison_2013">
@@ -397,7 +397,7 @@
         <!-- End prior -->
 
         <!-- Begin likelihood -->
-        <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+        <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution" useThreads="true">
 
             <!-- Alignment likelihood -->
             <distribution id="treeLikelihood.bison_2013" spec="ThreadedTreeLikelihood" data="@bison_2013" tree="@Tree.t:bison_2013">
@@ -413,7 +413,7 @@
                 </siteModel>
 
                 <!-- Clock model (strict clock) -->
-                <branchRateModel id="StrictClock.c:bison_2013" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate.c:bison_2013"/>
+                <branchRateModel id="StrictClock.c:bison_2013" spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate.c:bison_2013"/>
 
             </distribution>            
         </distribution>
@@ -467,7 +467,7 @@
         <log idref="freqParameter.s:bison_2013"/>
         <log idref="clockRate.c:bison_2013"/>
 
-        <log id="TreeHeight.t:bison_2013" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:bison_2013"/>
+        <log id="TreeHeight.t:bison_2013" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:bison_2013"/>
         <log idref="bPopSizes.t:bison_2013"/>
         <log idref="bGroupSizes.t:bison_2013"/>
         <log id="bPopSizeChangeTimes.t:bison_2013" spec="popSizeChangeTimeLogger" skyline="@BayesianSkyline.t:bison_2013"/>        
@@ -481,7 +481,7 @@
     </logger>
 
     <logger id="treelog" fileName="output/$(filebase)_$(seed).trees" logEvery="10000" mode="tree">
-        <log id="TreeWithMetaDataLogger.t:bison_2013" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:bison_2013"/>
+        <log id="TreeWithMetaDataLogger.t:bison_2013" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:bison_2013"/>
     </logger>
 
 </run>
