@@ -84,8 +84,22 @@
                 <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
             </classpath>
         </javac>
+
+        <mkdir dir="${build-beast}/beast2-${beast-version}/test"/>
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${build-beast}/beast2-${beast-version}/test"
+               destdir="${build-beast}/beast2-${beast-version}/build"
+               includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
+                <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
+            </classpath>
+        </javac>
+
         <copy todir="${build-lib}">
             <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
+            <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
         </copy>
         <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}/beast2-${beast-version}/build" />
 
