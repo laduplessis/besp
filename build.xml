@@ -225,7 +225,7 @@
 
         <mkdir dir="${pack}"/>
         <mkdir dir="${pack}/examples"/>
-        <mkdir dir="${pack}/${templates}"/>
+        <mkdir dir="${pack}/templates"/>
         <mkdir dir="${pack}/lib"/>
         <mkdir dir="${pack}/doc"/>
 
@@ -250,8 +250,8 @@
             <fileset dir="${examples}" includes="**/*.fasta" />
         </copy>
 
-        <mkdir dir="${templates}" />
-        <copy todir="${pack}/${templates}">
+        <mkdir dir="fxtemplates" />
+        <copy todir="${pack}/fxtemplates">
             <fileset dir="${templates}" includes="*.xml" />
         </copy>
 
