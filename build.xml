@@ -16,7 +16,7 @@
     <!-- Directories necessary for all BEAST 2 packages -->
     <property name="doc" location="doc"/>
     <property name="examples" location="examples"/>
-    <property name="templates" location="templates"/>
+    <property name="templates" location="fxtemplates"/>
 
     <!-- BEAST branch and version to build against
          (only different for version tags because of
@@ -52,8 +52,11 @@
         <mkdir dir="${build-lib}"/>
         <mkdir dir="${dist}"/>
 
-        <copy todir="${build-lib}" failonerror="false" quiet="true">
-            <fileset dir="${lib}" includes="*.jar"/>
+        <copy todir="${build-lib}">
+<!--            <fileset dir="${lib}" includes="*.jar"/>-->
+            <fileset dir="${beastDir}/lib" includes="*.jar"/>
+            <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
+            <fileset dir="${BeastFXpath}/locallib" includes="*.jar"/>
         </copy>
     </target>
 
@@ -120,9 +123,15 @@
                 <fileset dir="${beastDir}/lib" includes="*.jar"/>
             </classpath>
         </javac>
-        <copy todir="${build-lib}">
-            <fileset dir="${beastDir}/lib" includes="*.jar"/>
-        </copy>
+        <!-- for testing -->
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${beastDir}/test" destdir="${build-beast}"
+               includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-lib}" includes="*.jar"/>
+            </classpath>
+        </javac>
 
         <!-- Java FX  -->
         <!-- if Zulu is not installed, it can specify javac, e.g. add  -->
@@ -150,7 +159,9 @@
 
     <!-- Compile -->
     <target name="compile" depends="build-beast, get-dependencies">
-        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${src}" destdir="${build}" includeantruntime="false">
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${src}" destdir="${build}"
+               includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${build-lib}" includes="*.jar"/>
@@ -171,10 +182,11 @@
         <mkdir dir="${test-reports}"/>
     </target>
 
-    <!--  TODO not tested    -->
     <!-- Compile unit tests -->
     <target name="compile-test" depends="init-test,compile,copy-resources">
-        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${test}" destdir="${build-test}" includeantruntime="false">
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${test}" destdir="${build-test}"
+               includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <pathelement path="${build}" />
@@ -213,7 +225,7 @@
 
         <mkdir dir="${pack}"/>
         <mkdir dir="${pack}/examples"/>
-        <mkdir dir="${pack}/templates"/>
+        <mkdir dir="${pack}/${templates}"/>
         <mkdir dir="${pack}/lib"/>
         <mkdir dir="${pack}/doc"/>
 
@@ -239,7 +251,7 @@
         </copy>
 
         <mkdir dir="${templates}" />
-        <copy todir="${pack}/templates">
+        <copy todir="${pack}/${templates}">
             <fileset dir="${templates}" includes="*.xml" />
         </copy>
 
