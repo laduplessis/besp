@@ -239,7 +239,7 @@
 
         <mkdir dir="${pack}"/>
         <mkdir dir="${pack}/examples"/>
-        <mkdir dir="${pack}/templates"/>
+        <mkdir dir="${pack}/fxtemplates"/>
         <mkdir dir="${pack}/lib"/>
         <mkdir dir="${pack}/doc"/>
 
