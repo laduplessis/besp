@@ -13,7 +13,7 @@ KV Parag, L du Plessis, OG Pybus. _Jointly inferring the dynamics of population 
 
 To install BESP:
 
-1. Download and install [BEAST2](www.beast2.org) (at least version 2.5.0).
+1. Download and install [BEAST2](www.beast2.org) (at least version 2.7.0).
 2. Launch the BEAUti application distributed with BEAST2.
 3. From the File menu select "Manage Packages".
 4. Click the "Package repositories" button at the bottom of the Package Manager dialog box.
@@ -26,7 +26,7 @@ To install BESP:
 
 To build this package from source, ensure that  you have the following installed:
 
-- Java JDK v1.8
+- Java JDK v17
 - Apache Ant v1.9 or later
 - An internet connection
 

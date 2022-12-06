@@ -1,17 +1,17 @@
 package bsp.distributions;
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.coalescent.IntervalType;
-import beast.math.Binomial;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Binomial;
 
 import java.util.Arrays;
 
-import static beast.evolution.tree.coalescent.IntervalType.SAMPLE;
+import static beast.base.evolution.tree.IntervalType.SAMPLE;
 
 
 /***************************************************************

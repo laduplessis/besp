@@ -1,29 +1,29 @@
 package bsp.distributions;
 
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.tree.TreeDistribution;
-import beast.evolution.tree.coalescent.IntervalType;
-import beast.evolution.tree.coalescent.TreeIntervals;
-import beast.math.Binomial;
-import beast.util.HeapSort;
-import beast.util.Randomizer;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.tree.IntervalType;
+import beast.base.evolution.tree.TreeDistribution;
+import beast.base.evolution.tree.TreeIntervals;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Binomial;
+import beast.base.util.HeapSort;
+import beast.base.util.Randomizer;
 
 import java.util.Arrays;
 
-import static beast.evolution.tree.coalescent.IntervalType.COALESCENT;
+import static beast.base.evolution.tree.IntervalType.COALESCENT;
 
 /*****************************************
  * Bayesian Skyline Plot implementation. *
  *****************************************
  *
  * - This implementation will return the same likelihood as
- *   beast.evolution.tree.coalescent.BayesianSkyline, but will hopefully also be faster
+ *   beast.base.evolution.tree.coalescent.BayesianSkyline, but will hopefully also be faster
  * - This implementation makes use of the TreeIntervals class, like the original BayesianSkyline
  * - Only one parameter (popSizes) which can change only at coalescent times, which are grouped with
  *   popSizeGroupSizes.
